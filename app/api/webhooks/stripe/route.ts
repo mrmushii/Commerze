@@ -1,15 +1,14 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import Stripe from 'stripe';
-import { buffer } from 'micro'; // For parsing raw body
 import dbConnect from '@/lib/dbConnect';
-import Order from '@/models/Order';
-import Product from '@/models/Products';
-import { IOrder, CartItem } from '@/lib/type';
+import Order from '@/models/Order'; // Corrected import path for Order
+import Product from '@/models/Products'; // Corrected import path for Product
+import { IOrder, CartItem } from '@/lib/type'; // Corrected import path for IOrder and CartItem
 
 // Initialize Stripe with your secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20',
+  apiVersion: '2025-05-28.basil', // Set to the version causing the TypeScript error
   typescript: true,
 });
 
@@ -29,9 +28,10 @@ export const config = {
  * @returns {NextResponse} A JSON response indicating success or an error.
  */
 export async function POST(req: Request) {
-  // Get the raw body for signature verification
-  const buf = await buffer(req);
-  const signature = headers().get('stripe-signature');
+  // Get the raw body for signature verification using req.text() for Web Request objects
+  const rawBody = await req.text();
+  // Await headers() before calling .get()
+  const signature = (await headers()).get('stripe-signature');
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!; // Your Stripe webhook signing secret
 
   let event: Stripe.Event;
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, message: 'Webhook secret or signature missing.' }, { status: 400 });
     }
     // Verify the webhook signature
-    event = stripe.webhooks.constructEvent(buf.toString(), signature, webhookSecret);
+    event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
   } catch (err: any) {
     console.error(`Webhook signature verification failed: ${err.message}`);
     return NextResponse.json({ success: false, message: `Webhook Error: ${err.message}` }, { status: 400 });
@@ -121,6 +121,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('Error processing webhook event:', error);
     // Return a 500 response if your server encounters an error during processing
+    // Return a 500 response if your server encounters an error during processing
     return NextResponse.json({ success: false, message: 'Error processing webhook.' }, { status: 500 });
   }
-}
+};

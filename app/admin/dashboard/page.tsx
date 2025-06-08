@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server'; // Import auth
 import { redirect } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Products';
@@ -6,14 +6,29 @@ import Link from 'next/link';
 // import Order from '@/models/Order'; // Assuming you'll create this later
 
 /**
+ * Define a custom type for Clerk's sessionClaims to ensure 'metadata' and 'role' are recognized.
+ * This extends the default SessionClaims type from Clerk to include our custom publicMetadata.
+ */
+interface CustomSessionClaims {
+  metadata?: {
+    role?: string; // Make role optional as it might not always be present
+  };
+}
+
+/**
  * Admin Dashboard Page (Server Component).
  * This page fetches data server-side and enforces admin-only access.
  */
 export default async function AdminDashboardPage() {
-  const { userId, sessionClaims } = auth();
+  // Await the auth() call to get the resolved object
+  const { userId, sessionClaims } = await auth();
+
+  // Explicitly cast sessionClaims to our custom type for better type inference
+  const claims = sessionClaims as CustomSessionClaims;
 
   // Redirect if not signed in or not an admin
-  if (!userId || sessionClaims?.metadata?.role !== 'admin') {
+  // Check for userId, then safely access role using optional chaining
+  if (!userId || claims?.metadata?.role !== 'admin') {
     redirect('/sign-in'); // Redirect to sign-in page if unauthorized
   }
 

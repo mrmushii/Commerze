@@ -1,13 +1,21 @@
-import { authMiddleware } from '@clerk/nextjs';
+import { clerkMiddleware } from '@clerk/nextjs/server';
+import { createRouteMatcher } from '@clerk/nextjs/server';
 
-// This example protects all routes including api/trpc routes
-// Please edit this to allow other routes to be public as needed.
-// See [https://clerk.com/docs/references/nextjs/auth-middleware](https://clerk.com/docs/references/nextjs/auth-middleware) for more information about configuring your middleware
-export default authMiddleware({
-  // Routes that can be accessed while signed out
-  publicRoutes: ['/', '/products(.*)', '/sign-in(.*)', '/sign-up(.*)', '/api/webhooks/stripe'],
-  // Routes that can always be accessed, and have no authentication information
-  // ignoredRoutes: ['/no-auth-in-this-route'],
+// Define your public routes here
+const isPublicRoute = createRouteMatcher([
+  '/',
+  '/products(.*)',
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/api/webhooks/stripe',
+]);
+
+export default clerkMiddleware((auth, req) => {
+  if (isPublicRoute(req)) {
+    return;
+  }
+
+  
 });
 
 export const config = {

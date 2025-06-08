@@ -5,19 +5,31 @@ import Order from '@/models/Order';
 import { IOrder } from '@/lib/type';
 import Link from 'next/link';
 import OrderStatusDropdown from '@/components/admin/OrderStatusDropdown'; // We'll create this
+import mongoose from 'mongoose'; // Import mongoose for type safety
 
 /**
  * Admin Order Management Page.
  * This is a Server Component that fetches all orders from the database.
  */
+
+interface CustomSessionClaims {
+  metadata?: {
+    role?: string; // Make role optional as it might not always be present
+  };
+}
+
 export default async function AdminOrdersPage() {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth(); // Await auth()
 
   // Redirect if not signed in or not an admin
-  if (!userId || sessionClaims?.metadata?.role !== 'admin') {
-    redirect('/sign-in');
-  }
-
+ const claims = sessionClaims as CustomSessionClaims;
+ 
+   // Redirect if not signed in or not an admin
+   // Check for userId, then safely access role using optional chaining
+   if (!userId || claims?.metadata?.role !== 'admin') {
+     redirect('/sign-in'); // Redirect to sign-in page if unauthorized
+   }
+ 
   await dbConnect(); // Connect to MongoDB
   const orders: IOrder[] = await Order.find({}).sort({ createdAt: -1 }); // Fetch all orders, newest first
 
@@ -43,8 +55,9 @@ export default async function AdminOrdersPage() {
             </thead>
             <tbody>
               {orders.map((order) => (
-                <tr key={order._id.toString()} className="hover:bg-gray-50 transition duration-150 ease-in-out">
-                  <td className="py-3 px-4 border-b text-gray-800 font-medium">{order._id.toString().substring(0, 8)}...</td>
+                // Explicitly cast order._id to mongoose.Types.ObjectId for toString()
+                <tr key={(order._id as mongoose.Types.ObjectId).toString()} className="hover:bg-gray-50 transition duration-150 ease-in-out">
+                  <td className="py-3 px-4 border-b text-gray-800 font-medium">{(order._id as mongoose.Types.ObjectId).toString().substring(0, 8)}...</td>
                   <td className="py-3 px-4 border-b text-gray-600">{order.userId.substring(0, 8)}...</td> {/* Display partial userId */}
                   <td className="py-3 px-4 border-b text-gray-800">${order.totalAmount.toFixed(2)}</td>
                   <td className="py-3 px-4 border-b">
@@ -59,7 +72,7 @@ export default async function AdminOrdersPage() {
                   <td className="py-3 px-4 border-b">
                     {/* Client component for updating status */}
                     <OrderStatusDropdown
-                      orderId={order._id.toString()}
+                      orderId={(order._id as mongoose.Types.ObjectId).toString()}
                       currentStatus={order.orderStatus}
                     />
                   </td>
@@ -67,7 +80,7 @@ export default async function AdminOrdersPage() {
                     {new Date(order.createdAt).toLocaleDateString()}
                   </td>
                   <td className="py-3 px-4 border-b">
-                    <Link href={`/admin/orders/${order._id.toString()}`} className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition">
+                    <Link href={`/admin/orders/${(order._id as mongoose.Types.ObjectId).toString()}`} className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition">
                       Details
                     </Link>
                     {/* Add delete button for admin if needed, similar to products */}

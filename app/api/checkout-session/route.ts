@@ -6,7 +6,7 @@ import { CartItem } from '@/lib/type'; // Import CartItem type
 
 // Initialize Stripe with your secret key and API version
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20', // Use a specific API version
+  apiVersion: '2025-05-28.basil', // Updated to the version causing the TypeScript error to resolve it
   typescript: true, // Enable TypeScript support for Stripe
 });
 

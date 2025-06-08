@@ -2,7 +2,17 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Products';
-import { IProduct } from '@/lib/type';
+import { IProduct } from '@/lib/type'; // Ensure correct import path for IProduct
+
+/**
+ * Define a custom type for Clerk's sessionClaims to ensure 'metadata' and 'role' are recognized.
+ * This extends the default SessionClaims type from Clerk to include our custom publicMetadata.
+ */
+interface CustomSessionClaims {
+  metadata?: {
+    role?: string; // Make role optional as it might not always be present
+  };
+}
 
 /**
  * Handles GET requests to retrieve a single product by ID.
@@ -41,10 +51,13 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
   await dbConnect(); // Ensure database connection
   const { id } = context.params; // Get product ID from dynamic route
 
-  const { userId, sessionClaims } = auth(); // Get authentication details from Clerk
+  const { userId, sessionClaims } = await auth(); // Get authentication details from Clerk
+
+  // Explicitly cast sessionClaims to our custom type for better type inference
+  const claims = sessionClaims as CustomSessionClaims;
 
   // Check if user is authenticated and has 'admin' role
-  if (!userId || sessionClaims?.metadata?.role !== 'admin') {
+  if (!userId || claims?.metadata?.role !== 'admin') {
     return NextResponse.json({ success: false, message: 'Unauthorized: Admin access required' }, { status: 403 });
   }
 
@@ -80,10 +93,13 @@ export async function DELETE(req: Request, context: { params: { id: string } }) 
   await dbConnect(); // Ensure database connection
   const { id } = context.params; // Get product ID from dynamic route
 
-  const { userId, sessionClaims } = auth(); // Get authentication details from Clerk
+  const { userId, sessionClaims } = await auth(); // Get authentication details from Clerk
+
+  // Explicitly cast sessionClaims to our custom type for better type inference
+  const claims = sessionClaims as CustomSessionClaims;
 
   // Check if user is authenticated and has 'admin' role
-  if (!userId || sessionClaims?.metadata?.role !== 'admin') {
+  if (!userId || claims?.metadata?.role !== 'admin') {
     return NextResponse.json({ success: false, message: 'Unauthorized: Admin access required' }, { status: 403 });
   }
 

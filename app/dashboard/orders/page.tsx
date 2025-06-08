@@ -4,13 +4,14 @@ import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import { IOrder } from '@/lib/type';
 import Link from 'next/link';
+import mongoose from 'mongoose';
 
 /**
  * User Order History Page.
  * This is a Server Component that fetches orders specific to the authenticated user.
  */
 export default async function UserOrdersPage() {
-  const { userId } = auth();
+  const { userId } = await auth();
 
   // Redirect if user is not signed in
   if (!userId) {
@@ -30,9 +31,9 @@ export default async function UserOrdersPage() {
       ) : (
         <div className="space-y-6">
           {orders.map((order) => (
-            <div key={order._id.toString()} className="border border-gray-200 rounded-lg p-5 shadow-sm">
+            <div key={(order._id as mongoose.Types.ObjectId).toString()} className="border border-gray-200 rounded-lg p-5 shadow-sm">
               <div className="flex justify-between items-center mb-3">
-                <h2 className="text-xl font-semibold text-gray-800">Order ID: {order._id.toString().substring(0, 8)}...</h2>
+                <h2 className="text-xl font-semibold text-gray-800">Order ID: {(order._id as mongoose.Types.ObjectId).toString().substring(0, 8)}...</h2>
                 <span className={`px-3 py-1 text-sm font-semibold rounded-full ${
                   order.orderStatus === 'delivered' ? 'bg-green-100 text-green-800' :
                   order.orderStatus === 'shipped' ? 'bg-blue-100 text-blue-800' :
@@ -57,7 +58,7 @@ export default async function UserOrdersPage() {
                 </ul>
               </div>
               <div className="mt-4 text-right">
-                <Link href={`/dashboard/orders/${order._id.toString()}`} className="text-blue-600 hover:underline font-medium">
+                <Link href={`/dashboard/orders/${(order._id as mongoose.Types.ObjectId).toString()}`} className="text-blue-600 hover:underline font-medium">
                   View Details
                 </Link>
               </div>

@@ -52,3 +52,9 @@ export interface CartItem {
   imageUrl: string;
   quantity: number;
 }
+
+export interface CustomSessionClaims {
+  metadata?: {
+    role?: string; // Make role optional as it might not always be present
+  };
+}
