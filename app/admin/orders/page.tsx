@@ -1,3 +1,4 @@
+// app/admin/orders/page.tsx
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
@@ -11,25 +12,25 @@ import mongoose from 'mongoose'; // Import mongoose for type safety
  * Admin Order Management Page.
  * This is a Server Component that fetches all orders from the database.
  */
-
-interface CustomSessionClaims {
-  metadata?: {
-    role?: string; // Make role optional as it might not always be present
-  };
-}
-
 export default async function AdminOrdersPage() {
   const { userId, sessionClaims } = await auth(); // Await auth()
 
+  // Define a custom type for Clerk's sessionClaims to ensure 'metadata' and 'role' are recognized.
+  // This extends the default SessionClaims type from Clerk to include our custom publicMetadata.
+  interface CustomSessionClaims {
+    metadata?: {
+      role?: string; // Make role optional as it might not always be present
+    };
+  }
+
+  // Explicitly cast sessionClaims to our custom type for better type inference
+  const claims = sessionClaims as CustomSessionClaims;
+
   // Redirect if not signed in or not an admin
- const claims = sessionClaims as CustomSessionClaims;
- 
-   // Redirect if not signed in or not an admin
-   // Check for userId, then safely access role using optional chaining
-   if (!userId || claims?.metadata?.role !== 'admin') {
-     redirect('/sign-in'); // Redirect to sign-in page if unauthorized
-   }
- 
+  if (!userId || claims?.metadata?.role !== 'admin') {
+    redirect('/sign-in');
+  }
+
   await dbConnect(); // Connect to MongoDB
   const orders: IOrder[] = await Order.find({}).sort({ createdAt: -1 }); // Fetch all orders, newest first
 

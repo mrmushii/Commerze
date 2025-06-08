@@ -1,9 +1,12 @@
+// app/products/[id]/page.tsx
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Products';
 import { IProduct } from '@/lib/type';
 import AddToCartButton from '@/components/AddToCartButton'; // We'll create this soon
+import mongoose from 'mongoose'; // Import mongoose for type safety
+
 
 /**
  * Generates static paths for products during build time.
@@ -14,7 +17,7 @@ export async function generateStaticParams() {
   await dbConnect();
   const products = await Product.find({}, { _id: 1 }); // Fetch only IDs
   return products.map(product => ({
-    id: product._id.toString(),
+    id: (product._id as mongoose.Types.ObjectId).toString(),
   }));
 }
 

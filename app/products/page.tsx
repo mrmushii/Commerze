@@ -1,3 +1,4 @@
+// app/products/page.tsx
 import Image from 'next/image';
 import Link from 'next/link';
 import dbConnect from '@/lib/dbConnect';
@@ -54,5 +55,5 @@ export default async function ProductsPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -1,16 +1,20 @@
+// app/admin/products/new/page.tsx
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import ProductForm from '@/components/admin/ProductForm';
+import { CustomSessionClaims } from '@/lib/type'; // Import CustomSessionClaims
 
 /**
  * Page for adding a new product to the e-commerce store.
  * Requires admin authentication.
  */
 export default async function NewProductPage() {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth(); // Await auth()
+
+  const claims = sessionClaims as CustomSessionClaims; // Type assertion
 
   // Redirect if not signed in or not an admin
-  if (!userId || sessionClaims?.metadata?.role !== 'admin') {
+  if (!userId || claims?.metadata?.role !== 'admin') {
     redirect('/sign-in');
   }
 

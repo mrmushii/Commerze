@@ -1,12 +1,13 @@
+// app/api/checkout-session/route.ts
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Products';
-import { CartItem } from '@/lib/type'; // Import CartItem type
+import { CartItem } from '@/lib/type'; // Corrected import path for CartItem
 
 // Initialize Stripe with your secret key and API version
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-05-28.basil', // Updated to the version causing the TypeScript error to resolve it
+  apiVersion: '2025-05-28.basil', // Using the API version from your local Stripe setup
   typescript: true, // Enable TypeScript support for Stripe
 });
 
@@ -84,11 +85,20 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ url: session.url }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) { // Changed 'any' to 'unknown'
     console.error('Stripe Checkout Session Creation Error:', error);
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { success: false, message: error.message || 'Failed to create checkout session.' },
+        { status: 500 }
+      );
+    }
     return NextResponse.json(
-      { success: false, message: error.message || 'Failed to create checkout session.' },
+      { success: false, message: 'An unexpected error occurred.' },
       { status: 500 }
     );
   }
 }
+
+
+

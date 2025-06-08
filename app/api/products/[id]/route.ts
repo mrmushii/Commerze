@@ -31,10 +31,10 @@ export async function GET(req: Request, context: { params: { id: string } }) {
       return NextResponse.json({ success: false, message: 'Product not found' }, { status: 404 });
     }
     return NextResponse.json({ success: true, data: product }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) { // Changed 'any' to 'unknown'
     console.error(`Error fetching product with ID ${id}:`, error);
     return NextResponse.json(
-      { success: false, message: 'Failed to fetch product', error: error.message },
+      { success: false, message: `Failed to fetch product: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 500 }
     );
   }
@@ -73,10 +73,10 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
       return NextResponse.json({ success: false, message: 'Product not found' }, { status: 404 });
     }
     return NextResponse.json({ success: true, data: product }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) { // Changed 'any' to 'unknown'
     console.error(`Error updating product with ID ${id}:`, error);
     return NextResponse.json(
-      { success: false, message: 'Failed to update product', error: error.message },
+      { success: false, message: `Failed to update product: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 400 } // Bad request for validation errors
     );
   }
@@ -110,10 +110,10 @@ export async function DELETE(req: Request, context: { params: { id: string } }) 
       return NextResponse.json({ success: false, message: 'Product not found' }, { status: 404 });
     }
     return NextResponse.json({ success: true, data: {} }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) { // Changed 'any' to 'unknown'
     console.error(`Error deleting product with ID ${id}:`, error);
     return NextResponse.json(
-      { success: false, message: 'Failed to delete product', error: error.message },
+      { success: false, message: `Failed to delete product: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 500 }
     );
   }

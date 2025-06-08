@@ -1,3 +1,4 @@
+// models/Order.ts
 import mongoose, { Schema, Document } from 'mongoose';
 import { IOrder, IOrderItem } from '@/lib/type'; // Import interfaces from your types file
 

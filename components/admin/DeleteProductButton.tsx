@@ -1,3 +1,4 @@
+// components/admin/DeleteProductButton.tsx
 'use client';
 
 import React from 'react';
@@ -33,9 +34,15 @@ const DeleteProductButton: React.FC<DeleteProductButtonProps> = ({ productId }) 
       await axios.delete(`/api/products/${productId}`);
       toast.success('Product deleted successfully!', { id: 'deleteProduct' });
       router.refresh(); // Refresh the page to reflect the deletion
-    } catch (error: any) {
+    } catch (error: unknown) { // Changed 'any' to 'unknown'
       console.error('Error deleting product:', error);
-      toast.error(error.response?.data?.message || 'Failed to delete product.', { id: 'deleteProduct' });
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        toast.error(error.response.data.message || 'Failed to delete product.', { id: 'deleteProduct' });
+      } else if (error instanceof Error) {
+        toast.error(error.message || 'Failed to delete product.', { id: 'deleteProduct' });
+      } else {
+        toast.error('Failed to delete product. An unexpected error occurred.', { id: 'deleteProduct' });
+      }
     }
   };
 

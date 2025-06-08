@@ -1,3 +1,4 @@
+// app/cart/page.tsx
 'use client'; // This is a Client Component
 
 import { useState, useEffect } from 'react';
@@ -100,9 +101,15 @@ export default function CartPage() {
       } else {
         toast.error('Failed to get checkout URL.', { id: 'checkout' });
       }
-    } catch (error: any) {
-      console.error('Checkout error:', error.response?.data || error);
-      toast.error(error.response?.data?.message || 'Failed to initiate checkout. Please try again.', { id: 'checkout' });
+    } catch (error: unknown) { // Changed 'any' to 'unknown'
+      console.error('Checkout error:', error);
+      if (axios.isAxiosError(error) && error.response?.data?.message) { // Type guard for AxiosError
+        toast.error(error.response.data.message, { id: 'checkout' });
+      } else if (error instanceof Error) {
+        toast.error(error.message || 'An unexpected error occurred during checkout.', { id: 'checkout' });
+      } else {
+        toast.error('An unexpected error occurred during checkout.', { id: 'checkout' });
+      }
     } finally {
       setLoading(false);
     }
@@ -173,3 +180,6 @@ export default function CartPage() {
     </div>
   );
 }
+
+
+

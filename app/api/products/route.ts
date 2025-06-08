@@ -25,11 +25,11 @@ export async function GET() {
     // Fetch all products from the database
     const products: IProduct[] = await Product.find({});
     return NextResponse.json({ success: true, data: products }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) { // Changed 'any' to 'unknown'
     // Handle errors during fetching
     console.error('Error fetching products:', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to fetch products', error: error.message },
+      { success: false, message: `Failed to fetch products: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 500 }
     );
   }
@@ -59,11 +59,11 @@ export async function POST(req: Request) {
     // Create a new product document in the database
     const product: IProduct = await Product.create(body);
     return NextResponse.json({ success: true, data: product }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) { // Changed 'any' to 'unknown'
     // Handle validation or database errors
     console.error('Error creating product:', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to create product', error: error.message },
+      { success: false, message: `Failed to create product: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 400 } // Bad request for validation errors
     );
   }

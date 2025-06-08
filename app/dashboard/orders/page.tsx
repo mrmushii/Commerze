@@ -1,17 +1,19 @@
+// app/dashboard/orders/page.tsx
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import { IOrder } from '@/lib/type';
 import Link from 'next/link';
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'; // Import mongoose for type safety
+import Image from 'next/image';
 
 /**
  * User Order History Page.
  * This is a Server Component that fetches orders specific to the authenticated user.
  */
 export default async function UserOrdersPage() {
-  const { userId } = await auth();
+  const { userId } = await auth(); // Await auth()
 
   // Redirect if user is not signed in
   if (!userId) {
@@ -27,10 +29,11 @@ export default async function UserOrdersPage() {
       <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">Your Orders</h1>
 
       {orders.length === 0 ? (
-        <p className="text-center text-gray-600 text-xl mt-8">You haven't placed any orders yet.</p>
+        <p className="text-center text-gray-600 text-xl mt-8">You haven&apos;t placed any orders yet.</p> 
       ) : (
         <div className="space-y-6">
           {orders.map((order) => (
+            // Ensure order._id is explicitly treated as ObjectId for toString()
             <div key={(order._id as mongoose.Types.ObjectId).toString()} className="border border-gray-200 rounded-lg p-5 shadow-sm">
               <div className="flex justify-between items-center mb-3">
                 <h2 className="text-xl font-semibold text-gray-800">Order ID: {(order._id as mongoose.Types.ObjectId).toString().substring(0, 8)}...</h2>
@@ -51,7 +54,8 @@ export default async function UserOrdersPage() {
                 <ul className="space-y-2">
                   {order.items.map((item, itemIndex) => (
                     <li key={itemIndex} className="flex items-center space-x-3 text-gray-700">
-                      <img src={item.imageUrl} alt={item.name} className="w-12 h-12 object-cover rounded-md" />
+                      {/* Use next/image component instead of img tag */}
+                      <Image src={item.imageUrl} alt={item.name} width={48} height={48} className="w-12 h-12 object-cover rounded-md" />
                       <span>{item.name} x {item.quantity} - ${item.price.toFixed(2)} each</span>
                     </li>
                   ))}

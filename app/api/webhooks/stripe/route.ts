@@ -1,6 +1,8 @@
+// app/api/webhooks/stripe/route.ts
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import Stripe from 'stripe';
+// Removed 'buffer' from 'micro' as req.text() is preferred for Web Request objects in App Router
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order'; // Corrected import path for Order
 import Product from '@/models/Products'; // Corrected import path for Product
@@ -13,6 +15,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 // Disable body parsing for this route as we need the raw body for Stripe signature verification
+// Note: In Next.js App Router, this 'config' export might not be directly honored for route handlers.
+// The primary way to handle raw body is `await req.text()`.
 export const config = {
   api: {
     bodyParser: false,
@@ -43,9 +47,9 @@ export async function POST(req: Request) {
     }
     // Verify the webhook signature
     event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
-  } catch (err: any) {
-    console.error(`Webhook signature verification failed: ${err.message}`);
-    return NextResponse.json({ success: false, message: `Webhook Error: ${err.message}` }, { status: 400 });
+  } catch (err: unknown) { // Changed 'any' to 'unknown'
+    console.error(`Webhook signature verification failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    return NextResponse.json({ success: false, message: `Webhook Error: ${err instanceof Error ? err.message : 'Unknown error'}` }, { status: 400 });
   }
 
   await dbConnect(); // Ensure database connection
@@ -106,9 +110,9 @@ export async function POST(req: Request) {
         console.log('Stripe Webhook: payment_intent.succeeded event received.');
         break;
       case 'charge.failed':
-        // Handle failed charges
+        // Fix: Removed 'failedCharge' variable assignment as it's not used, resolving no-unused-vars error
         console.log('Stripe Webhook: charge.failed event received.');
-        const failedCharge = event.data.object as Stripe.Charge;
+        // const failedCharge = event.data.object as Stripe.Charge; // Removed
         // You might want to update order payment status to 'failed' here
         // based on metadata from the Payment Intent if available
         break;
@@ -118,10 +122,13 @@ export async function POST(req: Request) {
 
     // Return a 200 response to Stripe to acknowledge receipt of the event
     return NextResponse.json({ received: true }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) { // Changed 'any' to 'unknown'
     console.error('Error processing webhook event:', error);
     // Return a 500 response if your server encounters an error during processing
-    // Return a 500 response if your server encounters an error during processing
-    return NextResponse.json({ success: false, message: 'Error processing webhook.' }, { status: 500 });
+    // Type guard for error message
+    return NextResponse.json({ success: false, message: `Error processing webhook: ${error instanceof Error ? error.message : 'Unknown error'}` }, { status: 500 });
   }
-};
+}
+
+
+

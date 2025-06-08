@@ -1,9 +1,12 @@
+// app/admin/products/edit/[id]/page.tsx
 import { auth } from '@clerk/nextjs/server';
 import { redirect, notFound } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Products';
-import { IProduct } from '@/lib/type';
+import { IProduct, CustomSessionClaims } from '@/lib/type'; // Import CustomSessionClaims and IProduct
 import ProductForm from '@/components/admin/ProductForm';
+import mongoose from 'mongoose'; // Import mongoose for ObjectId type
+
 
 /**
  * Page for editing an existing product.
@@ -11,10 +14,12 @@ import ProductForm from '@/components/admin/ProductForm';
  * Requires admin authentication.
  */
 export default async function EditProductPage({ params }: { params: { id: string } }) {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth(); // Await auth()
+
+  const claims = sessionClaims as CustomSessionClaims; // Type assertion
 
   // Redirect if not signed in or not an admin
-  if (!userId || sessionClaims?.metadata?.role !== 'admin') {
+  if (!userId || claims?.metadata?.role !== 'admin') {
     redirect('/sign-in');
   }
 

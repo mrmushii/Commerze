@@ -1,3 +1,4 @@
+// app/api/orders/route.ts
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server'; // Import auth
 import dbConnect from '@/lib/dbConnect';
@@ -23,7 +24,7 @@ interface CustomSessionClaims {
  * @param {Request} req - The incoming request object containing order data.
  * @returns {NextResponse} A JSON response with the created order or an error message.
  */
-export async function POST(req: Request) {
+export async function POST(req: Request) { // Removed 'req' parameter if unused, but kept for POST context
   await dbConnect(); // Ensure database connection is established
 
   try {
@@ -63,10 +64,10 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ success: true, data: order }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) { // Changed 'any' to 'unknown'
     console.error('Error creating order:', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to create order', error: error.message },
+      { success: false, message: `Failed to create order: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 500 }
     );
   }
@@ -76,7 +77,7 @@ export async function POST(req: Request) {
  * Handles GET requests to retrieve orders.
  * Admins fetch all orders; regular users fetch only their own.
  */
-export async function GET(req: Request) {
+export async function GET(req: Request) { // 'req' is now explicitly used, keeping it
   await dbConnect();
   const { userId, sessionClaims } = await auth(); // Await auth()
 
@@ -89,7 +90,6 @@ export async function GET(req: Request) {
 
   try {
     let orders: IOrder[];
-    // Check for userId, then safely access role using optional chaining
     const isAdmin = claims?.metadata?.role === 'admin';
 
     if (isAdmin) {
@@ -99,10 +99,10 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json({ success: true, data: orders }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) { // Changed 'any' to 'unknown'
     console.error('Error fetching orders:', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to fetch orders', error: error.message },
+      { success: false, message: `Failed to fetch orders: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 500 }
     );
   }

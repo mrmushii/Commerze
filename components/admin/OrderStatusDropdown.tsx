@@ -1,3 +1,4 @@
+// components/admin/OrderStatusDropdown.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -43,9 +44,15 @@ const OrderStatusDropdown: React.FC<OrderStatusDropdownProps> = ({ orderId, curr
       await axios.put(`/api/orders/${orderId}`, { orderStatus: newStatus });
       toast.success('Order status updated!', { id: `orderStatus-${orderId}` });
       router.refresh(); // Refresh the parent Server Component page
-    } catch (error: any) {
+    } catch (error: unknown) { // Changed 'any' to 'unknown'
       console.error('Error updating order status:', error);
-      toast.error(error.response?.data?.message || 'Failed to update status.', { id: `orderStatus-${orderId}` });
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        toast.error(error.response.data.message || 'Failed to update status.', { id: `orderStatus-${orderId}` });
+      } else if (error instanceof Error) {
+        toast.error(error.message || 'Failed to update status.', { id: `orderStatus-${orderId}` });
+      } else {
+        toast.error('Failed to update status. An unexpected error occurred.', { id: `orderStatus-${orderId}` });
+      }
       setSelectedStatus(currentStatus); // Revert on error
     } finally {
       setLoading(false);

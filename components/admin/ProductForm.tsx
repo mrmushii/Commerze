@@ -1,14 +1,17 @@
+// components/admin/ProductForm.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import axios from 'axios';
-import { IProduct } from '@/types'; // Import IProduct interface
+import { IProduct } from '@/lib/type'; // Import IProduct interface
+import mongoose from 'mongoose'; // Import mongoose for ObjectId type
+
 
 // Define props for the ProductForm component
 interface ProductFormProps {
-  initialData?: IProduct | null; // Optional: for editing existing products
+  initialData?: Omit<IProduct, 'createdAt' | 'updatedAt'> | null; // Optional: for editing existing products
 }
 
 /**
@@ -75,7 +78,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
       let response;
       if (initialData) {
         // Update existing product if initialData is provided
-        response = await axios.put(`/api/products/${initialData._id}`, dataToSend);
+        response = await axios.put(`/api/products/${(initialData._id as mongoose.Types.ObjectId).toString()}`, dataToSend); // Cast _id to string
         toast.success('Product updated successfully!');
       } else {
         // Create new product
@@ -86,9 +89,15 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
       console.log('API Response:', response.data);
       router.push('/admin/products'); // Redirect to product list after success
       router.refresh(); // Refresh the page to show latest data
-    } catch (error: any) {
+    } catch (error: unknown) { // Changed 'any' to 'unknown'
       console.error('Error saving product:', error);
-      toast.error(error.response?.data?.message || 'Failed to save product. Please check your inputs.');
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        toast.error(error.response.data.message || 'Failed to save product. Please check your inputs.');
+      } else if (error instanceof Error) {
+        toast.error(error.message || 'Failed to save product. Please check your inputs.');
+      } else {
+        toast.error('Failed to save product. An unexpected error occurred.');
+      }
     } finally {
       setLoading(false);
     }

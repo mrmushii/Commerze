@@ -1,9 +1,11 @@
+// components/AddToCartButton.tsx
 'use client'; // This directive marks the component as a Client Component
 
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { IProduct, CartItem } from '@/lib/type'; // Import types
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'; // Import mongoose for ObjectId type
+
 
 /**
  * Props for AddToCartButton.
