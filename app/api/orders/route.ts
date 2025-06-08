@@ -1,21 +1,15 @@
-// app/api/orders/route.ts
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server'; // Import auth
+import { auth } from '@clerk/nextjs/server';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import Product from '@/models/Products';
-import { IOrder, CartItem, CustomSessionClaims } from '@/lib/type'; // Import types and CustomSessionClaims
+import { IOrder, CustomSessionClaims } from '@/lib/type';
 
 /**
  * Handles POST requests to create a new order.
- * This API is primarily intended to be called by a webhook (e.g., Stripe webhook)
- * or by an authenticated client after a successful payment.
- *
- * @param {Request} req - The incoming request object containing order data.
- * @returns {NextResponse} A JSON response with the created order or an error message.
  */
 export async function POST(req: Request) {
-  await dbConnect(); // Ensure database connection is established
+  await dbConnect();
 
   try {
     const body = await req.json();
@@ -28,9 +22,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Optional: Perform stock decrement here if not already handled by webhook
-    // This logic is mostly for synchronous order creation, but for e-commerce,
-    // webhooks are preferred for reliability after async payment.
+    // Optional: Perform stock decrement logic
     for (const item of items) {
       const product = await Product.findById(item.productId);
       if (!product || product.stock < item.quantity) {
@@ -39,22 +31,21 @@ export async function POST(req: Request) {
           { status: 400 }
         );
       }
-      // Decrement stock (if not using webhook for this)
+      // Uncomment this if you want to actually decrement stock now
       // await Product.findByIdAndUpdate(item.productId, { $inc: { stock: -item.quantity } });
     }
 
-    // Create a new order document
     const order: IOrder = await Order.create({
       userId,
       items,
       totalAmount,
       paymentStatus,
       stripeSessionId,
-      orderStatus: 'pending', // Initial status
+      orderStatus: 'pending',
     });
 
     return NextResponse.json({ success: true, data: order }, { status: 201 });
-  } catch (error: unknown) { // Changed 'any' to 'unknown'
+  } catch (error: unknown) {
     console.error('Error creating order:', error);
     return NextResponse.json(
       { success: false, message: `Failed to create order: ${error instanceof Error ? error.message : 'Unknown error'}` },
@@ -66,15 +57,10 @@ export async function POST(req: Request) {
 /**
  * Handles GET requests to retrieve orders.
  * Admins fetch all orders; regular users fetch only their own.
- *
- * @param {Request} _req - The incoming request object (renamed to _req to prevent unused-vars linting error).
- * @returns {NextResponse} A JSON response containing the list of orders or an error message.
  */
-export async function GET(_req: Request) { // 'req' renamed to '_req' to satisfy ESLint
+export async function GET() {
   await dbConnect();
-  const { userId, sessionClaims } = await auth(); // Await auth()
-
-  // Explicitly cast sessionClaims to our custom type for better type inference
+  const { userId, sessionClaims } = await auth();
   const claims = sessionClaims as CustomSessionClaims;
 
   if (!userId) {
@@ -82,17 +68,13 @@ export async function GET(_req: Request) { // 'req' renamed to '_req' to satisfy
   }
 
   try {
-    let orders: IOrder[];
     const isAdmin = claims?.metadata?.role === 'admin';
-
-    if (isAdmin) {
-      orders = await Order.find({}); // Fetch all orders for admin
-    } else {
-      orders = await Order.find({ userId: userId }); // Fetch only user's orders
-    }
+    const orders: IOrder[] = isAdmin
+      ? await Order.find({})
+      : await Order.find({ userId });
 
     return NextResponse.json({ success: true, data: orders }, { status: 200 });
-  } catch (error: unknown) { // Changed 'any' to 'unknown'
+  } catch (error: unknown) {
     console.error('Error fetching orders:', error);
     return NextResponse.json(
       { success: false, message: `Failed to fetch orders: ${error instanceof Error ? error.message : 'Unknown error'}` },

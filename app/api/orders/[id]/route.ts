@@ -81,7 +81,7 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
 
   try {
     // Adjusted destructuring to avoid unused variable linting errors
-    const { userId: bodyUserId, items: bodyItems, ...updateData } = await req.json(); // Safely destructure and ignore if not needed
+    const { userId: _bodyUserId, items: _bodyItems, ...updateData } = await req.json(); // Safely destructure and ignore if not needed
     // You can now use bodyUserId and bodyItems if you need them for other logic, or simply omit if not.
     // If not used, ESLint will still complain unless you explicitly ignore them,
     // but the original intent was to exclude them from `updateData`.

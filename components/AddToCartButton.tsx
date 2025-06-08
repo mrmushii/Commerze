@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { IProduct, CartItem } from '@/lib/type'; // Import types
-import mongoose from 'mongoose'; // Import mongoose for ObjectId type
+
 
 
 /**
