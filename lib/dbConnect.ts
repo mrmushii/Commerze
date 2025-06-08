@@ -1,4 +1,4 @@
-
+// lib/dbConnect.ts
 import mongoose from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -9,11 +9,19 @@ if (!MONGODB_URI) {
   );
 }
 
+// More precise type for global object for Mongoose caching
+type MongooseCache = {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+};
 
-let cached = (global as any).mongoose;
+// Use a global variable to store the Mongoose connection to prevent multiple connections in development
+// Assign it directly to a non-nullable type after the check
+let cached: MongooseCache = (global as typeof globalThis & { mongoose?: MongooseCache }).mongoose || { conn: null, promise: null };
 
-if (!cached) {
-  cached = (global as any).mongoose = { conn: null, promise: null };
+// Ensure cached.mongoose is assigned to the global object if it wasn't already
+if (!(global as typeof globalThis & { mongoose?: MongooseCache }).mongoose) {
+  (global as typeof globalThis & { mongoose: MongooseCache }).mongoose = cached;
 }
 
 /**
@@ -22,24 +30,22 @@ if (!cached) {
  * @returns {Promise<typeof mongoose>} The Mongoose connection instance.
  */
 async function dbConnect() {
-  // If a connection is already established, return it
+  // Now, cached.conn is guaranteed to be non-null after the initial assignment
   if (cached.conn) {
     console.log('Using cached database connection.');
     return cached.conn;
   }
 
-  // If no connection promise exists, create one
+  // Now, cached.promise is guaranteed to be non-null after the initial assignment
   if (!cached.promise) {
     const opts = {
       bufferCommands: false, // Disable Mongoose's buffering of commands
-      // useNewUrlParser: true, // Deprecated in recent Mongoose versions
-      // useUnifiedTopology: true, // Deprecated in recent Mongoose versions
     };
 
     // Connect to MongoDB using the URI
-    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
+    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongooseInstance) => {
       console.log('New database connection established.');
-      return mongoose;
+      return mongooseInstance;
     });
   }
 

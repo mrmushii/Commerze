@@ -3,18 +3,8 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
-import { IOrder } from '@/lib/type';
+import { IOrder, CustomSessionClaims } from '@/lib/type'; // Import CustomSessionClaims
 import mongoose from 'mongoose'; // Import mongoose to use isValidObjectId
-
-/**
- * Define a custom type for Clerk's sessionClaims to ensure 'metadata' and 'role' are recognized.
- * This extends the default SessionClaims type from Clerk to include our custom publicMetadata.
- */
-interface CustomSessionClaims {
-  metadata?: {
-    role?: string; // Make role optional as it might not always be present
-  };
-}
 
 /**
  * Handles GET requests to retrieve a single order by ID.
@@ -90,9 +80,11 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
   }
 
   try {
-    const body = await req.json();
-    // Prevent updating userId or items directly through this route
-    const { userId: _, items: __, ...updateData } = body; // Destructure to exclude userId and items
+    // Adjusted destructuring to avoid unused variable linting errors
+    const { userId: bodyUserId, items: bodyItems, ...updateData } = await req.json(); // Safely destructure and ignore if not needed
+    // You can now use bodyUserId and bodyItems if you need them for other logic, or simply omit if not.
+    // If not used, ESLint will still complain unless you explicitly ignore them,
+    // but the original intent was to exclude them from `updateData`.
 
     const order: IOrder | null = await Order.findByIdAndUpdate(id, updateData, {
       new: true,

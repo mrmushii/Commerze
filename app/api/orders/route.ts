@@ -4,17 +4,7 @@ import { auth } from '@clerk/nextjs/server'; // Import auth
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import Product from '@/models/Products';
-import { IOrder, CartItem } from '@/lib/type'; // Import types
-
-/**
- * Define a custom type for Clerk's sessionClaims to ensure 'metadata' and 'role' are recognized.
- * This extends the default SessionClaims type from Clerk to include our custom publicMetadata.
- */
-interface CustomSessionClaims {
-  metadata?: {
-    role?: string; // Make role optional as it might not always be present
-  };
-}
+import { IOrder, CartItem, CustomSessionClaims } from '@/lib/type'; // Import types and CustomSessionClaims
 
 /**
  * Handles POST requests to create a new order.
@@ -24,7 +14,7 @@ interface CustomSessionClaims {
  * @param {Request} req - The incoming request object containing order data.
  * @returns {NextResponse} A JSON response with the created order or an error message.
  */
-export async function POST(req: Request) { // Removed 'req' parameter if unused, but kept for POST context
+export async function POST(req: Request) {
   await dbConnect(); // Ensure database connection is established
 
   try {
@@ -76,8 +66,11 @@ export async function POST(req: Request) { // Removed 'req' parameter if unused,
 /**
  * Handles GET requests to retrieve orders.
  * Admins fetch all orders; regular users fetch only their own.
+ *
+ * @param {Request} _req - The incoming request object (renamed to _req to prevent unused-vars linting error).
+ * @returns {NextResponse} A JSON response containing the list of orders or an error message.
  */
-export async function GET(req: Request) { // 'req' is now explicitly used, keeping it
+export async function GET(_req: Request) { // 'req' renamed to '_req' to satisfy ESLint
   await dbConnect();
   const { userId, sessionClaims } = await auth(); // Await auth()
 

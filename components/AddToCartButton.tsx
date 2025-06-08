@@ -1,4 +1,3 @@
-// components/AddToCartButton.tsx
 'use client'; // This directive marks the component as a Client Component
 
 import { useState } from 'react';
@@ -47,10 +46,10 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({ product }) => {
 
     // Retrieve current cart from localStorage
     const storedCart = localStorage.getItem('cart');
-    let cart: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
+    const cart: CartItem[] = storedCart ? JSON.parse(storedCart) : []; // Changed 'let' to 'const'
 
     // Find if item already exists in cart
-    const existingItemIndex = cart.findIndex(item => item.productId === (product._id as mongoose.Types.ObjectId).toString());
+    const existingItemIndex = cart.findIndex(item => item.productId === product._id.toString());
 
     if (existingItemIndex > -1) {
       // If item exists, update its quantity
@@ -64,7 +63,7 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({ product }) => {
     } else {
       // If item doesn't exist, add it to cart
       const cartItem: CartItem = {
-        productId: (product._id as mongoose.Types.ObjectId).toString(),
+        productId: product._id.toString(),
         name: product.name,
         price: product.price,
         imageUrl: product.imageUrl,

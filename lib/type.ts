@@ -1,11 +1,12 @@
-// types.ts or lib/types.ts
-import mongoose, { Document } from 'mongoose';
+import { Document } from 'mongoose';
+import mongoose from 'mongoose'; // Import mongoose here for ObjectId type
 
 /**
  * Interface for a Product document in MongoDB.
  * Extends Mongoose's Document for database interaction.
  */
 export interface IProduct extends Document {
+  _id: mongoose.Types.ObjectId; // Explicitly define _id type
   name: string;
   description: string;
   price: number;
@@ -32,6 +33,7 @@ export interface IOrderItem {
  * Extends Mongoose's Document for database interaction.
  */
 export interface IOrder extends Document {
+  _id: mongoose.Types.ObjectId; // Explicitly define _id type
   userId: string; // Clerk's userId
   items: IOrderItem[];
   totalAmount: number;
@@ -53,6 +55,10 @@ export interface CartItem {
   quantity: number;
 }
 
+/**
+ * Custom type for Clerk's sessionClaims to ensure 'metadata' and 'role' are recognized.
+ * This extends the default SessionClaims type from Clerk to include our custom publicMetadata.
+ */
 export interface CustomSessionClaims {
   metadata?: {
     role?: string; // Make role optional as it might not always be present

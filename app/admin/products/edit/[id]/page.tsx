@@ -5,7 +5,7 @@ import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Products';
 import { IProduct, CustomSessionClaims } from '@/lib/type'; // Import CustomSessionClaims and IProduct
 import ProductForm from '@/components/admin/ProductForm';
-import mongoose from 'mongoose'; // Import mongoose for ObjectId type
+// Removed unused import: import mongoose from 'mongoose';
 
 
 /**
