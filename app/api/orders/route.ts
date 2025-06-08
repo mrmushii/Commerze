@@ -1,83 +1,105 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
-import Product from '@/models/Products';
-import { IOrder, CustomSessionClaims } from '@/lib/type';
+import { auth } from '@clerk/nextjs/server';
+import { CustomSessionClaims, IOrder } from '@/lib/type';
 
 /**
- * Handles POST requests to create a new order.
+ * Handles GET request to fetch a single order by ID.
+ * Admins can access any order; users can access their own orders.
  */
-export async function POST(req: Request) {
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
   await dbConnect();
+  const { userId, sessionClaims } = await auth();
+  const claims = sessionClaims as CustomSessionClaims;
+
+  if (!userId) {
+    return NextResponse.json(
+      { success: false, message: 'Unauthorized: Sign in required' },
+      { status: 401 }
+    );
+  }
 
   try {
-    const body = await req.json();
-    const { userId, items, totalAmount, paymentStatus = 'pending', stripeSessionId } = body;
+    const order: IOrder | null = await Order.findById(params.id);
 
-    if (!userId || !items || !Array.isArray(items) || items.length === 0 || !totalAmount) {
+    if (!order) {
       return NextResponse.json(
-        { success: false, message: 'Invalid order data provided.' },
-        { status: 400 }
+        { success: false, message: 'Order not found' },
+        { status: 404 }
       );
     }
 
-    // Optional: Perform stock decrement logic
-    for (const item of items) {
-      const product = await Product.findById(item.productId);
-      if (!product || product.stock < item.quantity) {
-        return NextResponse.json(
-          { success: false, message: `Insufficient stock for product: ${item.name}` },
-          { status: 400 }
-        );
-      }
-      // Uncomment this if you want to actually decrement stock now
-      // await Product.findByIdAndUpdate(item.productId, { $inc: { stock: -item.quantity } });
+    const isAdmin = claims?.metadata?.role === 'admin';
+    const isOwner = order.userId === userId;
+
+    if (!isAdmin && !isOwner) {
+      return NextResponse.json(
+        { success: false, message: 'Forbidden: You cannot access this order' },
+        { status: 403 }
+      );
     }
 
-    const order: IOrder = await Order.create({
-      userId,
-      items,
-      totalAmount,
-      paymentStatus,
-      stripeSessionId,
-      orderStatus: 'pending',
-    });
-
-    return NextResponse.json({ success: true, data: order }, { status: 201 });
+    return NextResponse.json({ success: true, data: order }, { status: 200 });
   } catch (error: unknown) {
-    console.error('Error creating order:', error);
+    console.error('Error fetching order:', error);
     return NextResponse.json(
-      { success: false, message: `Failed to create order: ${error instanceof Error ? error.message : 'Unknown error'}` },
+      {
+        success: false,
+        message: `Failed to fetch order: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      },
       { status: 500 }
     );
   }
 }
 
 /**
- * Handles GET requests to retrieve orders.
- * Admins fetch all orders; regular users fetch only their own.
+ * Handles DELETE request to delete an order by ID.
+ * Only admins are allowed to perform this action.
  */
-export async function GET() {
+export async function DELETE(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
   await dbConnect();
   const { userId, sessionClaims } = await auth();
   const claims = sessionClaims as CustomSessionClaims;
 
-  if (!userId) {
-    return NextResponse.json({ success: false, message: 'Unauthorized: Sign in required' }, { status: 401 });
+  if (!userId || claims?.metadata?.role !== 'admin') {
+    return NextResponse.json(
+      { success: false, message: 'Unauthorized: Admins only' },
+      { status: 403 }
+    );
   }
 
   try {
-    const isAdmin = claims?.metadata?.role === 'admin';
-    const orders: IOrder[] = isAdmin
-      ? await Order.find({})
-      : await Order.find({ userId });
+    const deletedOrder = await Order.findByIdAndDelete(params.id);
 
-    return NextResponse.json({ success: true, data: orders }, { status: 200 });
-  } catch (error: unknown) {
-    console.error('Error fetching orders:', error);
+    if (!deletedOrder) {
+      return NextResponse.json(
+        { success: false, message: 'Order not found' },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json(
-      { success: false, message: `Failed to fetch orders: ${error instanceof Error ? error.message : 'Unknown error'}` },
+      { success: true, message: 'Order deleted successfully' },
+      { status: 200 }
+    );
+  } catch (error: unknown) {
+    console.error('Error deleting order:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: `Failed to delete order: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      },
       { status: 500 }
     );
   }
