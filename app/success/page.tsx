@@ -1,19 +1,17 @@
-// app/success/page.tsx
 'use client'; // Can be client or server, depending on if you fetch session details
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react'; // Import Suspense
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { IOrder } from '@/lib/type'; // Import IOrder type
-import mongoose from 'mongoose';
 
 /**
  * Success Page after a successful Stripe Checkout.
  * Displays a success message and order details (if available).
  */
-export default function SuccessPage() {
+function SuccessPageContent() { // Renamed to SuccessPageContent
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id'); // Get Stripe sessionId from query params
   const [order, setOrder] = useState<IOrder | null>(null);
@@ -72,7 +70,7 @@ export default function SuccessPage() {
       {order ? (
         <div className="mb-4 text-left p-4 border border-gray-200 rounded-md bg-gray-50">
           <p className="text-md text-gray-700 mb-2">
-            **Order ID:** <span className="font-semibold text-blue-600">{(order._id as mongoose.Types.ObjectId).toString().substring(0, 8)}...</span>
+            **Order ID:** <span className="font-semibold text-blue-600">{order._id.toString().substring(0, 8)}...</span>
           </p>
           <p className="text-md text-gray-700 mb-2">
             **Stripe Session ID:** <span className="font-semibold text-blue-600">{sessionId}</span>
@@ -95,4 +93,19 @@ export default function SuccessPage() {
     </div>
   );
 }
+
+// Export the main page component wrapped in Suspense
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-xl text-gray-700">Loading success page...</p>
+      </div>
+    }>
+      <SuccessPageContent />
+    </Suspense>
+  );
+}
+
+
 
