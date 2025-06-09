@@ -1,35 +1,25 @@
 // app/products/[id]/page.tsx
+
+export const dynamic = 'force-dynamic'; // ⬅️ Add this line
+
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Products';
 import { IProduct } from '@/lib/type';
-import AddToCartButton from '@/components/AddToCartButton'; // We'll create this soon
-import mongoose from 'mongoose'; // Import mongoose for type safety
+import AddToCartButton from '@/components/AddToCartButton';
+import mongoose from 'mongoose';
 
-
-/**
- * Generates static paths for products during build time.
- * This is useful for static site generation (SSG) if you know your product IDs in advance.
- * For dynamic content, you might not use this or use a different strategy.
- */
-export async function generateStaticParams() {
-  await dbConnect();
-  const products = await Product.find({}, { _id: 1 }); // Fetch only IDs
-  return products.map(product => ({
-    id: (product._id as mongoose.Types.ObjectId).toString(),
-  }));
-}
-
-/**
- * Renders the product detail page for a specific product ID.
- * @param {object} props - Contains route parameters (e.g., params.id).
- */
 export default async function ProductDetailPage({ params }: { params: { id: string } }) {
-  await dbConnect(); // Connect to MongoDB
-  const product: IProduct | null = await Product.findById(params.id); // Fetch product by ID
+  await dbConnect();
 
-  // If product not found, display 404 page
+  // Validate ID
+  if (!mongoose.Types.ObjectId.isValid(params.id)) {
+    notFound();
+  }
+
+  const product: IProduct | null = await Product.findById(params.id);
+
   if (!product) {
     notFound();
   }
@@ -63,7 +53,6 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
             )}
           </div>
 
-          {/* Add to Cart Button (Client Component) */}
           <AddToCartButton product={JSON.parse(JSON.stringify(product))} />
         </div>
       </div>
