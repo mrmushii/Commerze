@@ -1,69 +1,53 @@
-import { auth } from '@clerk/nextjs/server'; // Import auth
+// app/admin/dashboard/page.tsx
+import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Products';
+import { CustomSessionClaims } from '@/lib/type';
 import Link from 'next/link';
-// import Order from '@/models/Order'; // Assuming you'll create this later
 
-/**
- * Define a custom type for Clerk's sessionClaims to ensure 'metadata' and 'role' are recognized.
- * This extends the default SessionClaims type from Clerk to include our custom publicMetadata.
- */
-interface CustomSessionClaims {
-  metadata?: {
-    role?: string; // Make role optional as it might not always be present
-  };
-}
-
-/**
- * Admin Dashboard Page (Server Component).
- * This page fetches data server-side and enforces admin-only access.
- */
 export default async function AdminDashboardPage() {
-  // Await the auth() call to get the resolved object
+  console.log('--- AdminDashboardPage (Server): Render Start ---');
+
   const { userId, sessionClaims } = await auth();
 
-  // Explicitly cast sessionClaims to our custom type for better type inference
+  // Debug output
+  console.log('Server: Raw userId:', userId);
+  console.log('Server: Raw sessionClaims (full object):', JSON.stringify(sessionClaims, null, 2));
+
   const claims = sessionClaims as CustomSessionClaims;
 
-  // Redirect if not signed in or not an admin
-  // Check for userId, then safely access role using optional chaining
-  if (!userId || claims?.metadata?.role !== 'admin') {
-    redirect('/sign-in'); // Redirect to sign-in page if unauthorized
+  // ✅ Fixed: use public_metadata instead of metadata
+  const isAdmin = claims?.public_metadata?.role === 'admin';
+
+  console.log('Server: claims?.public_metadata?.role:', claims?.public_metadata?.role);
+  console.log('Server: isAdmin calculated:', isAdmin);
+
+  if (!userId || !isAdmin) {
+    console.log('Server: Unauthorized access or not admin, redirecting to /sign-in');
+    redirect('/sign-in');
   }
 
-  await dbConnect(); // Connect to your database
-
-  // Fetch some admin-specific data, e.g., product count, total orders
+  await dbConnect();
   const productCount = await Product.countDocuments({});
-  // const totalOrders = await Order.countDocuments({}); // Uncomment when Order model is ready
+  console.log('Server: Product Count:', productCount);
+  console.log('--- AdminDashboardPage (Server): Render End ---');
 
   return (
     <div className="p-6 bg-white shadow-md rounded-lg">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Admin Dashboard</h1>
-
       <p className="text-lg text-gray-700 mb-4">Welcome back, Admin!</p>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-blue-100 p-4 rounded-md shadow-sm">
           <h2 className="text-xl font-semibold text-blue-800">Products</h2>
           <p className="text-3xl font-bold text-blue-900">{productCount}</p>
         </div>
-        {/*
-        <div className="bg-green-100 p-4 rounded-md shadow-sm">
-          <h2 className="text-xl font-semibold text-green-800">Total Orders</h2>
-          <p className="text-3xl font-bold text-green-900">{totalOrders}</p>
-        </div>
-        */}
-        {/* Add more admin insights here */}
       </div>
-
       <div className="mt-8">
         <h2 className="text-2xl font-semibold mb-4 text-gray-800">Quick Actions</h2>
         <ul className="list-disc list-inside text-blue-600">
           <li><Link href="/admin/products" className="hover:underline">Manage Products</Link></li>
           <li><Link href="/admin/orders" className="hover:underline">Manage Orders</Link></li>
-          {/* Add more links for admin functionalities */}
         </ul>
       </div>
     </div>

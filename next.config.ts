@@ -6,7 +6,10 @@ const nextConfig: NextConfig = {
   },
   typescript:{
     ignoreBuildErrors: true,
-  }
+  },
+   images: {
+    domains: ['www.lg.com', 'placehold.co', 'another-domain.com'], // Add all your external image hosts here
+  },
 };
 
 export default nextConfig;

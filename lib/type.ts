@@ -60,7 +60,10 @@ export interface CartItem {
  * This extends the default SessionClaims type from Clerk to include our custom publicMetadata.
  */
 export interface CustomSessionClaims {
-  metadata?: {
-    role?: string; // Make role optional as it might not always be present
+  public_metadata?: {
+    role?: string;
+    [key: string]: any; // Optional: for flexibility
   };
+  [key: string]: any; // Optional: if there are other fields
 }
+

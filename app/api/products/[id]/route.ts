@@ -9,7 +9,7 @@ import { IProduct } from '@/lib/type'; // Ensure correct import path for IProduc
  * This extends the default SessionClaims type from Clerk to include our custom publicMetadata.
  */
 interface CustomSessionClaims {
-  metadata?: {
+  publicMetadata?: {
     role?: string; // Make role optional as it might not always be present
   };
 }
@@ -57,7 +57,7 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
   const claims = sessionClaims as CustomSessionClaims;
 
   // Check if user is authenticated and has 'admin' role
-  if (!userId || claims?.metadata?.role !== 'admin') {
+  if (!userId || claims?.publicMetadata?.role !== 'admin') {
     return NextResponse.json({ success: false, message: 'Unauthorized: Admin access required' }, { status: 403 });
   }
 
@@ -99,7 +99,7 @@ export async function DELETE(req: Request, context: { params: { id: string } }) 
   const claims = sessionClaims as CustomSessionClaims;
 
   // Check if user is authenticated and has 'admin' role
-  if (!userId || claims?.metadata?.role !== 'admin') {
+  if (!userId || claims?.publicMetadata?.role !== 'admin') {
     return NextResponse.json({ success: false, message: 'Unauthorized: Admin access required' }, { status: 403 });
   }
 

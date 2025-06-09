@@ -11,12 +11,17 @@ import { CustomSessionClaims } from '@/lib/type'; // Import CustomSessionClaims
 export default async function NewProductPage() {
   const { userId, sessionClaims } = await auth(); // Await auth()
 
-  const claims = sessionClaims as CustomSessionClaims; // Type assertion
+  interface CustomSessionClaims {
+  public_metadata?: {
+    role?: string;
+  };
+}
 
-  // Redirect if not signed in or not an admin
-  if (!userId || claims?.metadata?.role !== 'admin') {
-    redirect('/sign-in');
-  }
+const claims = sessionClaims as CustomSessionClaims;
+
+if (!userId || claims?.public_metadata?.role !== 'admin') {
+  redirect('/sign-in');
+}
 
   return (
     <div className="container mx-auto p-4 max-w-2xl">

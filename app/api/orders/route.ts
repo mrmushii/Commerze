@@ -24,7 +24,18 @@ export async function GET(
   }
 
   try {
-    const order: IOrder | null = await Order.findById(params.id);
+    let order: IOrder | null = null;
+
+    // Try to find by MongoDB _id if it's a valid ObjectId
+    const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(params.id);
+    if (isValidObjectId) {
+      order = await Order.findById(params.id);
+    }
+
+    // If not found by _id, try finding by stripeSessionId
+    if (!order) {
+      order = await Order.findOne({ stripeSessionId: params.id });
+    }
 
     if (!order) {
       return NextResponse.json(
@@ -33,7 +44,7 @@ export async function GET(
       );
     }
 
-    const isAdmin = claims?.metadata?.role === 'admin';
+    const isAdmin = claims?.publicMetadata?.role === 'admin';
     const isOwner = order.userId === userId;
 
     if (!isAdmin && !isOwner) {
@@ -58,6 +69,7 @@ export async function GET(
   }
 }
 
+
 /**
  * Handles DELETE request to delete an order by ID.
  * Only admins are allowed to perform this action.
@@ -70,7 +82,7 @@ export async function DELETE(
   const { userId, sessionClaims } = await auth();
   const claims = sessionClaims as CustomSessionClaims;
 
-  if (!userId || claims?.metadata?.role !== 'admin') {
+  if (!userId || claims?.publicMetadata?.role !== 'admin') {
     return NextResponse.json(
       { success: false, message: 'Unauthorized: Admins only' },
       { status: 403 }

@@ -5,34 +5,27 @@ import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import { IOrder } from '@/lib/type';
 import Link from 'next/link';
-import OrderStatusDropdown from '@/components/admin/OrderStatusDropdown'; // We'll create this
-import mongoose from 'mongoose'; // Import mongoose for type safety
+import OrderStatusDropdown from '@/components/admin/OrderStatusDropdown';
+import mongoose from 'mongoose';
 
-/**
- * Admin Order Management Page.
- * This is a Server Component that fetches all orders from the database.
- */
+// Custom session claims type with publicMetadata (correct casing)
+interface CustomSessionClaims {
+  publicMetadata?: {
+    role?: string;
+  };
+}
+
 export default async function AdminOrdersPage() {
-  const { userId, sessionClaims } = await auth(); // Await auth()
-
-  // Define a custom type for Clerk's sessionClaims to ensure 'metadata' and 'role' are recognized.
-  // This extends the default SessionClaims type from Clerk to include our custom publicMetadata.
-  interface CustomSessionClaims {
-    metadata?: {
-      role?: string; // Make role optional as it might not always be present
-    };
-  }
-
-  // Explicitly cast sessionClaims to our custom type for better type inference
+  const { userId, sessionClaims } = await auth();
   const claims = sessionClaims as CustomSessionClaims;
 
-  // Redirect if not signed in or not an admin
-  if (!userId || claims?.metadata?.role !== 'admin') {
+  if (!userId || claims?.publicMetadata?.role !== 'admin') {
     redirect('/sign-in');
   }
 
-  await dbConnect(); // Connect to MongoDB
-  const orders: IOrder[] = await Order.find({}).sort({ createdAt: -1 }); // Fetch all orders, newest first
+  await dbConnect();
+
+  const orders: IOrder[] = await Order.find({}).sort({ createdAt: -1 });
 
   return (
     <div className="container mx-auto p-4 bg-white shadow-md rounded-lg">
@@ -55,39 +48,53 @@ export default async function AdminOrdersPage() {
               </tr>
             </thead>
             <tbody>
-              {orders.map((order) => (
-                // Explicitly cast order._id to mongoose.Types.ObjectId for toString()
-                <tr key={(order._id as mongoose.Types.ObjectId).toString()} className="hover:bg-gray-50 transition duration-150 ease-in-out">
-                  <td className="py-3 px-4 border-b text-gray-800 font-medium">{(order._id as mongoose.Types.ObjectId).toString().substring(0, 8)}...</td>
-                  <td className="py-3 px-4 border-b text-gray-600">{order.userId.substring(0, 8)}...</td> {/* Display partial userId */}
-                  <td className="py-3 px-4 border-b text-gray-800">${order.totalAmount.toFixed(2)}</td>
-                  <td className="py-3 px-4 border-b">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                      order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
-                      order.paymentStatus === 'failed' ? 'bg-red-100 text-red-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 border-b">
-                    {/* Client component for updating status */}
-                    <OrderStatusDropdown
-                      orderId={(order._id as mongoose.Types.ObjectId).toString()}
-                      currentStatus={order.orderStatus}
-                    />
-                  </td>
-                  <td className="py-3 px-4 border-b text-gray-600">
-                    {new Date(order.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="py-3 px-4 border-b">
-                    <Link href={`/admin/orders/${(order._id as mongoose.Types.ObjectId).toString()}`} className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition">
-                      Details
-                    </Link>
-                    {/* Add delete button for admin if needed, similar to products */}
-                  </td>
-                </tr>
-              ))}
+              {orders.map((order) => {
+                const orderIdStr = (order._id as mongoose.Types.ObjectId).toString();
+                return (
+                  <tr
+                    key={orderIdStr}
+                    className="hover:bg-gray-50 transition duration-150 ease-in-out"
+                  >
+                    <td className="py-3 px-4 border-b text-gray-800 font-medium">
+                      {orderIdStr.substring(0, 8)}...
+                    </td>
+                    <td className="py-3 px-4 border-b text-gray-600">
+                      {order.userId.substring(0, 8)}...
+                    </td>
+                    <td className="py-3 px-4 border-b text-gray-800">${order.totalAmount.toFixed(2)}</td>
+                    <td className="py-3 px-4 border-b">
+                      <span
+                        className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          order.paymentStatus === 'paid'
+                            ? 'bg-green-100 text-green-800'
+                            : order.paymentStatus === 'failed'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}
+                      >
+                        {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 border-b">
+                      <OrderStatusDropdown
+                        orderId={orderIdStr}
+                        currentStatus={order.orderStatus}
+                      />
+                    </td>
+                    <td className="py-3 px-4 border-b text-gray-600">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="py-3 px-4 border-b">
+                      <Link
+                        href={`/admin/orders/${orderIdStr}`}
+                        className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition"
+                      >
+                        Details
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

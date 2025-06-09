@@ -1,19 +1,16 @@
-// app/products/[id]/page.tsx
+export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic'; // ⬅️ Add this line
-
-import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Products';
 import { IProduct } from '@/lib/type';
 import AddToCartButton from '@/components/AddToCartButton';
 import mongoose from 'mongoose';
+import CustomImage from '@/components/CustomImage'; // Import client component
 
 export default async function ProductDetailPage({ params }: { params: { id: string } }) {
   await dbConnect();
 
-  // Validate ID
   if (!mongoose.Types.ObjectId.isValid(params.id)) {
     notFound();
   }
@@ -28,15 +25,12 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
     <div className="container mx-auto p-4 max-w-4xl bg-white shadow-md rounded-lg overflow-hidden">
       <div className="md:flex">
         <div className="md:flex-shrink-0 w-full md:w-1/2 relative h-80 md:h-auto">
-          <Image
+          <CustomImage
             src={product.imageUrl}
             alt={product.name}
-            layout="fill"
-            objectFit="contain"
+            fill
+            style={{ objectFit: 'contain' }}
             className="rounded-lg"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = `https://placehold.co/600x400/F0F0F0/ADADAD?text=Image+Not+Found`;
-            }}
           />
         </div>
         <div className="p-8 md:w-1/2">

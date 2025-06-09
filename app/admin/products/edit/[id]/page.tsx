@@ -16,12 +16,17 @@ import ProductForm from '@/components/admin/ProductForm';
 export default async function EditProductPage({ params }: { params: { id: string } }) {
   const { userId, sessionClaims } = await auth(); // Await auth()
 
-  const claims = sessionClaims as CustomSessionClaims; // Type assertion
+  interface CustomSessionClaims {
+  public_metadata?: {
+    role?: string;
+  };
+}
 
-  // Redirect if not signed in or not an admin
-  if (!userId || claims?.metadata?.role !== 'admin') {
-    redirect('/sign-in');
-  }
+const claims = sessionClaims as CustomSessionClaims;
+
+if (!userId || claims?.public_metadata?.role !== 'admin') {
+  redirect('/sign-in');
+}
 
   await dbConnect(); // Connect to MongoDB
   const product: IProduct | null = await Product.findById(params.id); // Fetch product by ID
