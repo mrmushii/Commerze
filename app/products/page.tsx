@@ -1,17 +1,27 @@
+export const dynamic = 'force-dynamic'; // Avoids build-time MongoDB connection errors
+
 import Link from 'next/link';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Products';
 import { IProduct } from '@/lib/type';
 import mongoose from 'mongoose';
-import CustomImage from '@/components/CustomImage'; // Import Client Component
+import CustomImage from '@/components/CustomImage'; // Client component
 
 export default async function ProductsPage() {
-  await dbConnect();
-  const products: IProduct[] = await Product.find({});
+  let products: IProduct[] = [];
+
+  try {
+    await dbConnect();
+    products = await Product.find({});
+  } catch (error) {
+    console.error('❌ Failed to load products:', error);
+    // Optionally display an error toast or message on UI if needed
+  }
 
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">Our Products</h1>
+
       {products.length === 0 ? (
         <p className="text-center text-gray-600 text-xl">No products available yet. Check back soon!</p>
       ) : (
