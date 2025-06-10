@@ -1,37 +1,34 @@
 // app/products/page.tsx
-// This page now acts as a comprehensive product listing with filtering and categories.
-'use client'; // Made client component to handle dynamic filtering states
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-
-
-import { IProduct } from '@/lib/type';
-import SearchComponent from '@/components/SearchComponent'; // For the combined search/filter UI
-import FeaturedProducts from '@/components/FeaturedProducts'; // For the featured section
 import toast from 'react-hot-toast';
+import { IProduct } from '@/lib/type';
+import SearchComponent from '@/components/SearchComponent'; // Can be used within the sidebar or elsewhere
+import FeaturedProducts from '@/components/FeaturedProducts'; // For Top Sellers
+import NewArrivals from '@/components/NewArrivals'; // For New Arrivals
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filter states, manage them locally or lift up if needed
+  // Filter states
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedType, setSelectedType] = useState('');
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]); // [min, max] for slider
   const [selectedColor, setSelectedColor] = useState('');
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedGender, setSelectedGender] = useState('');
+  const [searchTerm, setSearchTerm] = useState(''); // Added for in-page search
 
   const categories = ['Men', 'Women', 'Kids'];
   const types = ['Formal', 'Casual', 'Party', 'Sportswear', 'Other'];
-  const colors = ['Red', 'Blue', 'Black', 'White', 'Green', 'Yellow'];
+  const colors = ['Red', 'Blue', 'Black', 'White', 'Green', 'Yellow', 'Gray', 'Brown', 'Purple', 'Pink'];
   const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
   const genders = ['Men', 'Women', 'Kids', 'Unisex'];
-
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -39,17 +36,20 @@ export default function ProductsPage() {
       setError(null);
       try {
         const params = new URLSearchParams();
-        // Append filter parameters to the API call
+        if (searchTerm) params.append('q', searchTerm); // Include search term
         if (selectedCategory) params.append('category', selectedCategory);
         if (selectedType) params.append('type', selectedType);
-        if (minPrice) params.append('minPrice', minPrice);
-        if (maxPrice) params.append('maxPrice', maxPrice);
+
+        // Append price range from slider
+        params.append('minPrice', priceRange[0].toString());
+        params.append('maxPrice', priceRange[1].toString());
+
         if (selectedColor) params.append('color', selectedColor);
         if (selectedSize) params.append('size', selectedSize);
         if (selectedGender) params.append('gender', selectedGender);
 
         const queryString = params.toString();
-        const response = await fetch(`/api/products/search?${queryString}`); // Use the search API
+        const response = await fetch(`/api/products/search?${queryString}`);
         const data = await response.json();
 
         if (data.success) {
@@ -66,141 +66,231 @@ export default function ProductsPage() {
       }
     };
 
-    fetchProducts();
-  }, [selectedCategory, selectedType, minPrice, maxPrice, selectedColor, selectedSize, selectedGender]); // Re-fetch when any filter changes
+    const delayDebounceFn = setTimeout(() => {
+      fetchProducts();
+    }, 300); // Debounce search/filter changes
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm, selectedCategory, selectedType, priceRange, selectedColor, selectedSize, selectedGender]); // Include priceRange in dependency array
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setSelectedCategory('');
+    setSelectedType('');
+    setPriceRange([0, 500]); // Reset price range
+    setSelectedColor('');
+    setSelectedSize('');
+    setSelectedGender('');
+    toast.success('All filters cleared!');
+  };
+
+  // Ensure min <= max for price range slider
+  const handleMinPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    setPriceRange([value, Math.max(value, priceRange[1])]);
+  };
+
+  const handleMaxPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    setPriceRange([Math.min(value, priceRange[0]), value]);
+  };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">Our Collections</h1>
+    <div className="container mx-auto p-4 flex flex-col md:flex-row gap-6">
+      {/* Filter Sidebar */}
+      <aside className="md:w-1/4 p-6 bg-white rounded-lg shadow-md sticky top-24 h-fit"> {/* sticky top-24 to clear fixed navbar */}
+        <h2 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-4">Filters</h2>
 
-      {/* Primary Category Navigation (Men, Women, Kids) */}
-      <section className="mb-8 p-4 bg-blue-50 rounded-lg shadow-sm">
-        <h2 className="text-2xl font-semibold mb-4 text-blue-800">Shop by Main Category</h2>
-        <div className="flex flex-wrap justify-center gap-4">
-          {categories.map(cat => (
+        {/* In-sidebar Search Input */}
+        <div className="mb-6">
+          <label htmlFor="sidebarSearch" className="block text-sm font-medium text-gray-700 mb-2">Search Products</label>
+          <input
+            type="text"
+            id="sidebarSearch"
+            placeholder="Search by name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        {/* Main Categories */}
+        <div className="mb-6 border-b pb-6">
+          <h3 className="text-xl font-semibold mb-3 text-gray-800">Main Category</h3>
+          <div className="flex flex-col gap-2">
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(selectedCategory === cat ? '' : cat)}
+                className={`w-full text-left px-4 py-2 rounded-md transition duration-200 ${
+                  selectedCategory === cat ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-gray-50 text-gray-700'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Clothing Type Filter */}
+        <div className="mb-6 border-b pb-6">
+          <h3 className="text-xl font-semibold mb-3 text-gray-800">Clothing Type</h3>
+          <select id="typeFilter" value={selectedType} onChange={(e) => setSelectedType(e.target.value)}
+            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+            <option value="">All Types</option>
+            {types.map(type => <option key={type} value={type}>{type}</option>)}
+          </select>
+        </div>
+
+        {/* Gender Filter */}
+        <div className="mb-6 border-b pb-6">
+          <h3 className="text-xl font-semibold mb-3 text-gray-800">Gender</h3>
+          <select id="genderFilter" value={selectedGender} onChange={(e) => setSelectedGender(e.target.value)}
+            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+            <option value="">All Genders</option>
+            {genders.map(gender => <option key={gender} value={gender}>{gender}</option>)}
+          </select>
+        </div>
+
+        {/* Price Range Filter (Slider) */}
+        <div className="mb-6 border-b pb-6">
+          <h3 className="text-xl font-semibold mb-3 text-gray-800">Price</h3>
+          <div className="mb-4 text-center font-medium text-gray-700">
+            ${priceRange[0]} - ${priceRange[1]}
+          </div>
+          {/* Custom range input with two thumbs */}
+          <div className="relative h-2 bg-gray-200 rounded-full mb-4">
+            <div
+              className="absolute h-full bg-blue-600 rounded-full"
+              style={{ left: `${(priceRange[0] / 500) * 100}%`, width: `${((priceRange[1] - priceRange[0]) / 500) * 100}%` }}
+            ></div>
+            {/* Min Price Slider */}
+            <input
+              type="range"
+              min="0"
+              max="500"
+              value={priceRange[0]}
+              onChange={handleMinPriceChange}
+              className="absolute w-full h-full appearance-none bg-transparent price-range-slider" /* Added price-range-slider class */
+              style={{ top: 0, left: 0, zIndex: 2 }}
+            />
+            {/* Max Price Slider */}
+            <input
+              type="range"
+              min="0"
+              max="500"
+              value={priceRange[1]}
+              onChange={handleMaxPriceChange}
+              className="absolute w-full h-full appearance-none bg-transparent price-range-slider" /* Added price-range-slider class */
+              style={{ top: 0, left: 0, zIndex: 2 }}
+            />
+          </div>
+          <div className="flex justify-between text-sm text-gray-500 mt-2">
+            <span>$0</span>
+            <span>$500+</span>
+          </div>
+        </div>
+
+        {/* Color Filter (Palette) */}
+        <div className="mb-6 border-b pb-6">
+          <h3 className="text-xl font-semibold mb-3 text-gray-800">Colors</h3>
+          <div className="flex flex-wrap gap-2">
+            {colors.map(color => (
+              <button
+                key={color}
+                style={{ backgroundColor: color.toLowerCase() }}
+                onClick={() => setSelectedColor(selectedColor === color.toLowerCase() ? '' : color.toLowerCase())}
+                className={`w-8 h-8 rounded-full border-2 ${
+                  selectedColor === color.toLowerCase() ? 'border-blue-500 ring-2 ring-blue-500' : 'border-gray-300'
+                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200`}
+                title={color}
+              ></button>
+            ))}
             <button
-              key={cat}
-              onClick={() => setSelectedCategory(selectedCategory === cat ? '' : cat)} // Toggle selection
-              className={`px-6 py-3 rounded-full font-semibold transition duration-300 ${
-                selectedCategory === cat ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
+              onClick={() => setSelectedColor('')}
+              className={`w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-500 text-xs ${
+                selectedColor === '' ? 'border-blue-500 ring-2 ring-blue-500' : ''
+              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200`}
+              title="Clear Color"
             >
-              {cat}
+              All
             </button>
-          ))}
+          </div>
         </div>
-      </section>
 
-      {/* Filtering Options */}
-      <section className="mb-10 p-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-800">Filter Products</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div>
-            <label htmlFor="typeFilter" className="block text-sm font-medium text-gray-700">Clothing Type</label>
-            <select id="typeFilter" value={selectedType} onChange={(e) => setSelectedType(e.target.value)}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
-              <option value="">All Types</option>
-              {types.map(type => <option key={type} value={type}>{type}</option>)}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="genderFilter" className="block text-sm font-medium text-gray-700">Gender</label>
-            <select id="genderFilter" value={selectedGender} onChange={(e) => setSelectedGender(e.target.value)}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
-              <option value="">All Genders</option>
-              {genders.map(gender => <option key={gender} value={gender}>{gender}</option>)}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="minPriceFilter" className="block text-sm font-medium text-gray-700">Min Price ($)</label>
-            <input type="number" id="minPriceFilter" value={minPrice} onChange={(e) => setMinPrice(e.target.value)}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" placeholder="Min" />
-          </div>
-          <div>
-            <label htmlFor="maxPriceFilter" className="block text-sm font-medium text-gray-700">Max Price ($)</label>
-            <input type="number" id="maxPriceFilter" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" placeholder="Max" />
-          </div>
-          <div>
-            <label htmlFor="colorFilter" className="block text-sm font-medium text-gray-700">Color</label>
-            <select id="colorFilter" value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
-              <option value="">Any Color</option>
-              {colors.map(color => <option key={color} value={color}>{color}</option>)}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="sizeFilter" className="block text-sm font-medium text-gray-700">Size</label>
-            <select id="sizeFilter" value={selectedSize} onChange={(e) => setSelectedSize(e.target.value)}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
-              <option value="">Any Size</option>
-              {sizes.map(size => <option key={size} value={size}>{size}</option>)}
-            </select>
-          </div>
+        {/* Size Filter */}
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold mb-3 text-gray-800">Size</h3>
+          <select id="sizeFilter" value={selectedSize} onChange={(e) => setSelectedSize(e.target.value)}
+            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+            <option value="">Any Size</option>
+            {sizes.map(size => <option key={size} value={size}>{size}</option>)}
+          </select>
         </div>
+
+        {/* Clear Filters Button */}
         <button
-          onClick={() => { // Clear all filters
-            setSelectedCategory('');
-            setSelectedType('');
-            setMinPrice('');
-            setMaxPrice('');
-            setSelectedColor('');
-            setSelectedSize('');
-            setSelectedGender('');
-            toast.success('Filters cleared!');
-          }}
-          className="mt-6 px-5 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition duration-300 shadow-md"
+          onClick={handleClearFilters}
+          className="w-full px-6 py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition duration-300 shadow-md"
         >
-          Clear Filters
+          Clear All Filters
         </button>
-      </section>
+      </aside>
 
+      {/* Main Content Area - Product Grid */}
+      <main className="md:w-3/4">
+        <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">Our Collections</h1>
 
-      {/* Product Grid based on filters */}
-      {loading ? (
-        <div className="text-center p-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading products...</p>
-        </div>
-      ) : error ? (
-        <div className="text-center p-8 text-red-600">
-          <p>Error: {error}</p>
-          <p>Please try again later.</p>
-        </div>
-      ) : products.length === 0 ? (
-        <div className="text-center p-8 text-gray-600">
-          <p>No products found matching your criteria.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {products.map((product) => (
-            <div key={product._id.toString()} className="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105">
-              <Link href={`/products/${product._id.toString()}`}>
-                <div className="relative w-full h-48 bg-gray-200">
-                  <Image
-                    src={product.imageUrl}
-                    alt={product.name}
-                    layout="fill"
-                    objectFit="cover"
-                    className="rounded-t-lg"
-                    onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/400x300/F0F0F0/ADADAD?text=Image+Not+Found`; }}
-                  />
-                </div>
-                <div className="p-4">
-                  <h2 className="text-xl font-semibold text-gray-800 truncate mb-1">
-                    {product.name}
-                  </h2>
-                  <p className="text-gray-600 text-sm">{product.category} - {product.type}</p>
-                  <p className="text-2xl font-bold text-blue-600 mt-2">${product.price.toFixed(2)}</p>
-                </div>
-              </Link>
-            </div>
-          ))}
-        </div>
-      )}
+        {/* Conditional rendering for products */}
+        {loading ? (
+          <div className="text-center p-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading products...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center p-8 text-red-600">
+            <p>Error: {error}</p>
+            <p>Please try again later.</p>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center p-8 text-gray-600">
+            <p>No products found matching your criteria.</p>
+            <p className="text-sm mt-2">Try adjusting your filters or search term.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {products.map((product) => (
+              <div key={product._id.toString()} className="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105">
+                <Link href={`/products/${product._id.toString()}`}>
+                  <div className="relative w-full h-48 bg-gray-200">
+                    <Image
+                      src={product.imageUrl}
+                      alt={product.name}
+                      layout="fill"
+                      objectFit="cover"
+                      className="rounded-t-lg"
+                      onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/400x300/F0F0F0/ADADAD?text=Image+Not+Found`; }}
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h2 className="text-xl font-semibold text-gray-800 truncate mb-1">
+                      {product.name}
+                    </h2>
+                    <p className="text-gray-600 text-sm">{product.category} - {product.type}</p>
+                    <p className="text-2xl font-bold text-blue-600 mt-2">${product.price.toFixed(2)}</p>
+                  </div>
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
 
-      {/* Featured Collections Section (after regular products) */}
-      <FeaturedProducts limit={4} /> {/* Integrated Featured Products Component at the bottom */}
+        {/* Featured Collections / Top Sellers Section (Optional: can be at the bottom or on homepage only) */}
+        <FeaturedProducts title="Top Sellers You Might Love" limit={4} />
+
+        {/* New Arrivals Section (Optional: can be at the bottom or on homepage only) */}
+        <NewArrivals limit={4} />
+      </main>
     </div>
   );
 }

@@ -22,7 +22,7 @@ export default function RootLayout({
       <html lang="en">
         <body >
           <Navbar /> {/* Include the Navbar here */}
-          <main className="container mx-auto p-4">
+          <main className="container  mx-auto p-4 mt-16">
             {children}
           </main>
           <Toaster position="top-right" />
