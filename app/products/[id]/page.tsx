@@ -1,92 +1,211 @@
-// app/products/[id]/page.tsx
-import Image from 'next/image'; // Assuming CustomImage handles next/image internally
-import { notFound } from 'next/navigation';
-import dbConnect from '@/lib/dbConnect';
-import Product from '@/models/Products'; // Corrected import from '@/models/Products' to '@/models/Product'
-import { IProduct } from '@/lib/type'; // Corrected import from '@/lib/type' to '@/types'
-import AddToCartButton from '@/components/AddToCartButton';
-import mongoose from 'mongoose'; // Import mongoose for type safety
-import CustomImage from '@/components/CustomImage'; // Assuming you have this component
+'use client'; // Made client component to handle dynamic filtering states
+
+import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import dbConnect from '@/lib/dbConnect'; // Not directly used in client, but good to know data source
+import Product from '@/models/Products'; // Not directly used in client, but helps understand data type
+import { IProduct } from '@/lib/type';
+import SearchComponent from '@/components/SearchComponent'; // For the combined search/filter UI
+import FeaturedProducts from '@/components/FeaturedProducts'; // For the featured section (Top Sellers)
+import NewArrivals from '@/components/NewArrivals'; // Import the new component
+import toast from 'react-hot-toast';
 
 
-export const dynamic = 'force-dynamic'; // Ensures dynamic rendering, not static generation
+export default function ProductsPage() {
+  const [products, setProducts] = useState<IProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-interface ProductDetailPageProps {
-  params: { id: string };
-}
+  // Filter states, manage them locally or lift up if needed
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedType, setSelectedType] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
+  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedGender, setSelectedGender] = useState('');
 
-// REMOVED generateStaticParams because it can conflict with 'force-dynamic'
-// and cause misleading errors if not configured to pre-generate paths correctly.
-// If you intend to pre-generate specific product pages, you would need to implement
-// this function to return an array of { id: string } objects based on your products.
-// For fully dynamic pages, it's not needed.
-// export async function generateStaticParams() {
-//   await dbConnect();
-//   const products = await Product.find({}, { _id: 1 }); // Fetch only IDs
-//   return products.map(product => ({
-//     id: (product._id as mongoose.Types.ObjectId).toString(),
-//   }));
-// }
+  const categories = ['Men', 'Women', 'Kids'];
+  const types = ['Formal', 'Casual', 'Party', 'Sportswear', 'Other'];
+  const colors = ['Red', 'Blue', 'Black', 'White', 'Green', 'Yellow'];
+  const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+  const genders = ['Men', 'Women', 'Kids', 'Unisex'];
 
-export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
-  // FIX: Access params.id directly without 'await'. `params` is already resolved.
-  const { id } = params;
 
-  // It's good practice to ensure `id` exists, though Next.js handles this for dynamic routes.
-  if (!id) {
-    notFound();
-  }
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = new URLSearchParams();
+        // Append filter parameters to the API call
+        if (selectedCategory) params.append('category', selectedCategory);
+        if (selectedType) params.append('type', selectedType);
+        if (minPrice) params.append('minPrice', minPrice);
+        if (maxPrice) params.append('maxPrice', maxPrice);
+        if (selectedColor) params.append('color', selectedColor);
+        if (selectedSize) params.append('size', selectedSize);
+        if (selectedGender) params.append('gender', selectedGender);
 
-  await dbConnect();
+        const queryString = params.toString();
+        // Use the search API for general product listing and filtering
+        const response = await fetch(`/api/products/search?${queryString}`);
+        const data = await response.json();
 
-  // Validate if the ID is a valid MongoDB ObjectId
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    // If it's not a valid ObjectId, then this is an invalid product ID.
-    notFound();
-  }
+        if (data.success) {
+          setProducts(data.data);
+        } else {
+          setError(data.message || 'Failed to fetch products.');
+        }
+      } catch (err: unknown) {
+        console.error('Error fetching products:', err);
+        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+        setError(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Fetch product from the database
-  // Using .lean() for performance: converts Mongoose document to a plain JavaScript object
-  const productDoc = await Product.findById(id).lean();
-
-  // If product not found, display 404 page
-  if (!productDoc) {
-    notFound();
-  }
-
-  // Convert Mongoose document to a plain JavaScript object for client components
-  // and type assertion. This is needed because Mongoose documents are not plain JSON objects.
-  const product = JSON.parse(JSON.stringify(productDoc)) as IProduct;
+    fetchProducts();
+  }, [selectedCategory, selectedType, minPrice, maxPrice, selectedColor, selectedSize, selectedGender]); // Re-fetch when any filter changes
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl bg-white shadow-md rounded-lg overflow-hidden">
-      <div className="md:flex">
-        <div className="md:flex-shrink-0 w-full md:w-1/2 relative h-80 md:h-auto">
-          <CustomImage
-            src={product.imageUrl}
-            alt={product.name}
-            fill
-            style={{ objectFit: 'contain' }}
-            className="rounded-lg"
-          />
-        </div>
-        <div className="p-8 md:w-1/2">
-          <h1 className="text-4xl font-extrabold text-gray-900 mb-3">{product.name}</h1>
-          <p className="text-xl text-gray-700 mb-4">{product.category}</p>
-          <p className="text-4xl font-bold text-blue-700 mb-6">${product.price.toFixed(2)}</p>
-          <p className="text-gray-800 leading-relaxed mb-6">{product.description}</p>
+    <div className="container mx-auto p-4">
+      <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">Our Collections</h1>
 
-          <div className="mb-6">
-            {product.stock === 0 ? (
-              <span className="text-red-600 font-semibold text-lg">Out of Stock</span>
-            ) : (
-              <span className="text-green-700 font-semibold text-lg">In Stock: {product.stock} units</span>
-            )}
+      {/* Primary Category Navigation (Men, Women, Kids) */}
+      <section className="mb-8 p-4 bg-blue-50 rounded-lg shadow-sm">
+        <h2 className="text-2xl font-semibold mb-4 text-blue-800">Shop by Main Category</h2>
+        <div className="flex flex-wrap justify-center gap-4">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(selectedCategory === cat ? '' : cat)} // Toggle selection
+              className={`px-6 py-3 rounded-full font-semibold transition duration-300 ${
+                selectedCategory === cat ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Filtering Options */}
+      <section className="mb-10 p-6 bg-white rounded-lg shadow-md">
+        <h2 className="text-2xl font-semibold mb-4 text-gray-800">Filter Products</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <label htmlFor="typeFilter" className="block text-sm font-medium text-gray-700">Clothing Type</label>
+            <select id="typeFilter" value={selectedType} onChange={(e) => setSelectedType(e.target.value)}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+              <option value="">All Types</option>
+              {types.map(type => <option key={type} value={type}>{type}</option>)}
+            </select>
           </div>
-
-          <AddToCartButton product={product} />
+          <div>
+            <label htmlFor="genderFilter" className="block text-sm font-medium text-gray-700">Gender</label>
+            <select id="genderFilter" value={selectedGender} onChange={(e) => setSelectedGender(e.target.value)}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+              <option value="">All Genders</option>
+              {genders.map(gender => <option key={gender} value={gender}>{gender}</option>)}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="minPriceFilter" className="block text-sm font-medium text-gray-700">Min Price ($)</label>
+            <input type="number" id="minPriceFilter" value={minPrice} onChange={(e) => setMinPrice(e.target.value)}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" placeholder="Min" />
+          </div>
+          <div>
+            <label htmlFor="maxPriceFilter" className="block text-sm font-medium text-gray-700">Max Price ($)</label>
+            <input type="number" id="maxPriceFilter" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" placeholder="Max" />
+          </div>
+          <div>
+            <label htmlFor="colorFilter" className="block text-sm font-medium text-gray-700">Color</label>
+            <select id="colorFilter" value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+              <option value="">Any Color</option>
+              {colors.map(color => <option key={color} value={color}>{color}</option>)}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="sizeFilter" className="block text-sm font-medium text-gray-700">Size</label>
+            <select id="sizeFilter" value={selectedSize} onChange={(e) => setSelectedSize(e.target.value)}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+              <option value="">Any Size</option>
+              {sizes.map(size => <option key={size} value={size}>{size}</option>)}
+            </select>
+          </div>
         </div>
-      </div>
+        <button
+          onClick={() => { // Clear all filters
+            setSelectedCategory('');
+            setSelectedType('');
+            setMinPrice('');
+            setMaxPrice('');
+            setSelectedColor('');
+            setSelectedSize('');
+            setSelectedGender('');
+            toast.success('Filters cleared!');
+          }}
+          className="mt-6 px-5 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition duration-300 shadow-md"
+        >
+          Clear Filters
+        </button>
+      </section>
+
+
+      {/* Product Grid based on filters */}
+      {loading ? (
+        <div className="text-center p-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading products...</p>
+        </div>
+      ) : error ? (
+        <div className="text-center p-8 text-red-600">
+          <p>Error: {error}</p>
+          <p>Please try again later.</p>
+        </div>
+      ) : products.length === 0 ? (
+        <div className="text-center p-8 text-gray-600">
+          <p>No products found matching your criteria.</p>
+          <p className="text-sm mt-2">Try adjusting your filters or search term.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {products.map((product) => (
+            <div key={product._id.toString()} className="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105">
+              <Link href={`/products/${product._id.toString()}`}>
+                <div className="relative w-full h-48 bg-gray-200">
+                  <Image
+                    src={product.imageUrl}
+                    alt={product.name}
+                    layout="fill"
+                    objectFit="cover"
+                    className="rounded-t-lg"
+                    onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/400x300/F0F0F0/ADADAD?text=Image+Not+Found`; }}
+                  />
+                </div>
+                <div className="p-4">
+                  <h2 className="text-xl font-semibold text-gray-800 truncate mb-1">
+                    {product.name}
+                  </h2>
+                  <p className="text-gray-600 text-sm">{product.category} - {product.type}</p>
+                  <p className="text-2xl font-bold text-blue-600 mt-2">${product.price.toFixed(2)}</p>
+                </div>
+              </Link>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* New Arrivals Section */}
+      <NewArrivals limit={4} />
+
+      {/* Featured Collections / Top Sellers Section (Moved to the bottom if desired, or place appropriately) */}
+      <FeaturedProducts title="Top Sellers You Might Love" limit={4} />
     </div>
   );
 }
