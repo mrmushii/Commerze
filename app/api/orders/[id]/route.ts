@@ -5,9 +5,9 @@ import Order from '@/models/Order';
 import { IOrder, CustomSessionClaims } from '@/lib/type';
 import mongoose from 'mongoose';
 
-export async function GET(req: Request, context: { params: { id: string } }) {
+export async function GET(req: Request, context: any) {
   await dbConnect();
-  const { id } = context.params;
+  const { id } = await context.params;
   const { userId, sessionClaims } = await auth();
 
   const claims = sessionClaims as CustomSessionClaims;
@@ -59,9 +59,9 @@ export async function GET(req: Request, context: { params: { id: string } }) {
   }
 }
 
-export async function PUT(req: Request, context: { params: { id: string } }) {
+export async function PUT(req: Request, context: any) {
   await dbConnect();
-  const { id } = context.params;
+  const { id } = await context.params;
   const { userId, sessionClaims } = await auth();
 
   const claims = sessionClaims as CustomSessionClaims;
@@ -74,7 +74,6 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
   }
 
   try {
-    // Destructure to exclude userId and items if you want
     const { userId: _bodyUserId, items: _bodyItems, ...updateData } = await req.json();
 
     const order: IOrder | null = await Order.findByIdAndUpdate(id, updateData, {
@@ -104,9 +103,9 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
   }
 }
 
-export async function DELETE(req: Request, context: { params: { id: string } }) {
+export async function DELETE(req: Request, context: any) {
   await dbConnect();
-  const { id } = context.params;
+  const { id } = await context.params;
   const { userId, sessionClaims } = await auth();
 
   const claims = sessionClaims as CustomSessionClaims;

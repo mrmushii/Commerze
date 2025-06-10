@@ -11,7 +11,12 @@ export interface IProduct extends Document {
   description: string;
   price: number;
   imageUrl: string;
-  category: string;
+  category: string; // e.g., 'Men', 'Women', 'Kids' (Primary Category)
+  type: 'Formal' | 'Casual' | 'Party' | 'Sportswear' | 'Other'; // Secondary Category: Type of clothing
+  sizes: string[]; // e.g., ['S', 'M', 'L', 'XL']
+  colors: string[]; // e.g., ['Red', 'Blue', 'Black']
+  material: string; // e.g., 'Cotton', 'Polyester', 'Denim'
+  gender: 'Men' | 'Women' | 'Kids' | 'Unisex'; // More specific gender category
   stock: number;
   createdAt: Date;
   updatedAt: Date;

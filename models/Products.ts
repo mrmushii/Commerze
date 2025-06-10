@@ -4,11 +4,26 @@ import { IProduct } from '@/lib/type'; // Import the interface from your types f
 // Define the Mongoose Schema for a Product
 const ProductSchema: Schema = new Schema(
   {
-    name: { type: String, required: true, trim: true }, // Product name (e.g., "Laptop Pro")
+    name: { type: String, required: true, trim: true }, // Product name (e.g., "Men's Casual Shirt")
     description: { type: String, required: true }, // Detailed description of the product
     price: { type: Number, required: true, min: 0 }, // Price of the product, must be non-negative
     imageUrl: { type: String, required: true }, // URL to the product's image
-    category: { type: String, required: true, trim: true }, // Category of the product (e.g., "Electronics", "Apparel")
+    category: { type: String, required: true, trim: true }, // Primary Category: e.g., 'Men', 'Women', 'Kids'
+    type: { // Secondary Category: Type of clothing
+      type: String,
+      enum: ['Formal', 'Casual', 'Party', 'Sportswear', 'Other'],
+      required: true,
+      default: 'Other',
+    },
+    sizes: { type: [String], required: true }, // Available sizes, e.g., ['S', 'M', 'L']
+    colors: { type: [String], required: true }, // Available colors, e.g., ['Red', 'Blue']
+    material: { type: String, required: true, trim: true }, // Material, e.g., 'Cotton', 'Polyester'
+    gender: { // Specific gender category
+      type: String,
+      enum: ['Men', 'Women', 'Kids', 'Unisex'],
+      required: true,
+      default: 'Unisex',
+    },
     stock: { type: Number, required: true, default: 0, min: 0 }, // Current stock quantity, defaults to 0, must be non-negative
   },
   {
