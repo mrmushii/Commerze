@@ -1,44 +1,23 @@
+"use client"
 // app/page.tsx
 import SearchComponent from '@/components/SearchComponent';
 import FeaturedProducts from '@/components/FeaturedProducts';
 import NewsletterSubscription from '@/components/NewsletterSubscription'; // We'll create this component
 import Link from 'next/link';
 import Image from 'next/image';
+import Hero from '@/components/Hero';
 
 export default function HomePage() {
   return (
-    <div className="container mx-auto p-4">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg shadow-xl p-8 md:p-12 mb-10 overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <Image
-            src="https://placehold.co/1200x500/60A5FA/C4B5FD?text=Fashion+Banner"
-            alt="Fashion background"
-            layout="fill"
-            objectFit="cover"
-            quality={80}
-            className="opacity-20"
-          />
-        </div>
-        <div className="relative z-10 text-center">
-          <h1 className="text-4xl md:text-6xl font-extrabold mb-4 animate-fade-in-down">
-            Style Your Story
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 animate-fade-in-up">
-            Discover the latest trends in clothing for every occasion.
-          </p>
-          <Link href="/products" className="inline-block px-8 py-4 bg-white text-blue-600 font-bold rounded-full shadow-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 animate-fade-in-up delay-300">
-            Shop Now
-          </Link>
-        </div>
-      </section>
+    <div className="container mx-auto p-4 bg-secondary">
+      <Hero/>
 
       {/* Search Section */}
-      <section className="mb-10">
-        <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Find Your Perfect Outfit</h2>
+      <section className="mb-10 bg-white">
+        <h2 className="text-3xl font-bold text-center mb-6 text-gray-800 bg-white z-20">Find Your Perfect Outfit</h2>
         <SearchComponent /> {/* Integrated Search Component */}
         <p className="text-center text-gray-600 mt-4">
-          Or <Link href="/products" className="text-blue-600 hover:underline">browse all our collections</Link>.
+          Or <Link href="/products" className="text-blue-600 hover:underline">browse all our collections</Link>
         </p>
       </section>
 

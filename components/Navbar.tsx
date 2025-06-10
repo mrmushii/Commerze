@@ -29,30 +29,30 @@ const Navbar = () => {
   const isAdminClient = isSignedIn && (user?.publicMetadata as CustomSessionClaims['metadata'])?.role === 'admin';
 
   return (
-    <nav className="bg-blue-600 p-4 text-white flex justify-between items-center rounded-lg shadow-md m-2">
-      <div className="text-xl font-bold">
+    <nav className="py-6 px-12 flex justify-between items-center rounded-lg shadow-md m-2">
+      <div className="text-3xl font-extrabold">
         <Link href="/">Commerze</Link>
       </div>
       <ul className="flex space-x-4">
         <li>
-          <Link href="/products" className="hover:underline">Products</Link>
+          <Link href="/products" className="inline-block px-4 py-2 rounded-full hover:shadow-lg bg-white hover:bg-gray-100 transform hover:scale-105 transition duration-300 animate-fade-in-up delay-300">Products</Link>
         </li>
         <li>
-          <Link href="/cart" className="hover:underline">Cart</Link>
+          <Link href="/cart" className="inline-block px-4 py-2 rounded-full hover:shadow-lg bg-white hover:bg-gray-100 transform hover:scale-105 transition duration-300 animate-fade-in-up delay-300">Cart</Link>
         </li>
         <SignedIn>
          {isAdminClient ? ( // Use the client-side calculated isAdminClient to conditionally render the link
             <li>
-              <Link href="/admin/dashboard" className="hover:underline">Dashboard</Link>
+              <Link href="/admin/dashboard" className="inline-block px-4 py-2 rounded-full hover:shadow-lg bg-white hover:bg-gray-100 transform hover:scale-105 transition duration-300 animate-fade-in-up delay-300">Dashboard</Link>
             </li>
           ):
             <li>
-              <Link href="/dashboard/orders" className="hover:underline">Dashboard</Link>
+              <Link href="/dashboard/orders" className="inline-block px-4 py-2 rounded-full hover:shadow-lg bg-white hover:bg-gray-100 transform hover:scale-105 transition duration-300 animate-fade-in-up delay-300">Dashboard</Link>
             </li>
           }
           {isAdminClient && ( // Use the client-side calculated isAdminClient to conditionally render the link
             <li>
-              <Link href="/admin" className="hover:underline">Admin</Link>
+              <Link href="/admin" className="inline-block px-4 py-2 rounded-full hover:shadow-lg bg-white hover:bg-gray-100 transform hover:scale-105 transition duration-300 animate-fade-in-up delay-300">Admin</Link>
             </li>
           )}
           <li>
@@ -61,10 +61,10 @@ const Navbar = () => {
         </SignedIn>
         <SignedOut>
           <li>
-            <Link href="/sign-in" className="hover:underline">Sign In</Link>
+            <Link href="/sign-in" className="inline-block px-4 py-2 rounded-full hover:shadow-lg bg-white hover:bg-gray-100 transform hover:scale-105 transition duration-300 animate-fade-in-up delay-300">Sign In</Link>
           </li>
           <li>
-            <Link href="/sign-up" className="hover:underline">Sign Up</Link>
+            <Link href="/sign-up" className="inline-block px-4 py-2 rounded-full hover:shadow-lg bg-white hover:bg-gray-100 transform hover:scale-105 transition duration-300 animate-fade-in-up delay-300">Sign Up</Link>
           </li>
         </SignedOut>
       </ul>
