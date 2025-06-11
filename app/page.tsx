@@ -6,6 +6,7 @@ import NewsletterSubscription from '@/components/NewsletterSubscription'; // We'
 import Link from 'next/link';
 import Image from 'next/image';
 import Hero from '@/components/Hero';
+import { Suspense } from 'react';
 
 export default function HomePage() {
   return (
@@ -15,7 +16,13 @@ export default function HomePage() {
       {/* Search Section */}
       <section className="mb-10 bg-white">
         <h2 className="text-3xl font-bold text-center mb-6 text-gray-800 bg-white z-20">Find Your Perfect Outfit</h2>
-        <SearchComponent /> {/* Integrated Search Component */}
+        <Suspense fallback={
+          <div className="text-center p-8">
+            <p className="text-gray-600">Loading search options...</p>
+          </div>
+        }>
+          <SearchComponent /> {/* Integrated Search Component */}
+        </Suspense>
         <p className="text-center text-gray-600 mt-4">
           Or <Link href="/products" className="text-blue-600 hover:underline">browse all our collections</Link>
         </p>
