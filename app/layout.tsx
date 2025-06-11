@@ -26,12 +26,14 @@ export default function RootLayout({
           {/* Main content area */}
           <main className="flex-grow container mx-auto p-4 mt-16">
             {children}
+            
           </main>
 
           {/* Toast notifications */}
           <Toaster position="top-right" />
 
           {/* Footer at the bottom */}
+          <Footer/>
           
         </body>
       </html>
