@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
        'via.placeholder.com', // Add this hostname
       'placehold.it',  
       'img.clerk.com',    
+      'res.cloudinary.com',
     ], // Add all your external image hosts here
   },
 };
