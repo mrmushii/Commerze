@@ -11,11 +11,7 @@ import { CustomSessionClaims } from '@/lib/type'; // Import CustomSessionClaims
 export default async function NewProductPage() {
   const { userId, sessionClaims } = await auth(); // Await auth()
 
-  interface CustomSessionClaims {
-  public_metadata?: {
-    role?: string;
-  };
-}
+  
 
 const claims = sessionClaims as CustomSessionClaims;
 

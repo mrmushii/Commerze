@@ -1,3 +1,4 @@
+// components/SearchComponent.tsx
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -39,7 +40,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ isSearchResultsPage =
 
   const categories = ['Men', 'Women', 'Kids'];
   const types = ['Formal', 'Casual', 'Party', 'Sportswear', 'Other'];
-  const colors = ['Red', 'Blue', 'Black', 'White', 'Green', 'Yellow']; // Example colors
+  const colors = ['Red', 'Blue', 'Black', 'White', 'Green', 'Yellow', 'Gray', 'Brown', 'Purple', 'Pink']; // Example colors
   const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL']; // Example sizes
   const genders = ['Men', 'Women', 'Kids', 'Unisex'];
 
@@ -133,7 +134,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ isSearchResultsPage =
           className="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          onFocus={() => searchTerm.length > 0 && setSearchResults([])} // Clear previous results on focus
+          onFocus={() => searchTerm.length > 0 && setShowDropdown(true)} // Show dropdown on focus if term exists
         />
         <button
           type="submit"
@@ -206,7 +207,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ isSearchResultsPage =
               {searchResults.map((product) => (
                 <li key={product._id.toString()} className="flex items-center p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-200 last:border-b-0">
                   <Image
-                    src={product.imageUrl}
+                    src={product.imageUrls[0] || `https://placehold.co/40x40/F0F0F0/ADADAD?text=Img`} // Use first image from imageUrls
                     alt={product.name}
                     width={40}
                     height={40}
@@ -214,7 +215,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ isSearchResultsPage =
                     onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/40x40/F0F0F0/ADADAD?text=Img`; }}
                   />
                   <Link href={`/products/${product._id.toString()}`} className="flex-grow text-gray-800 font-medium" onClick={() => setShowDropdown(false)}>
-                    {product.name} - ${product.price.toFixed(2)}
+                    {product.name} - ${typeof product.price === 'number' ? product.price.toFixed(2) : product.price}
                   </Link>
                 </li>
               ))}

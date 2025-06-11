@@ -2,13 +2,9 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Products';
-import { IProduct } from '@/lib/type';
+import { CustomSessionClaims, IProduct } from '@/lib/type';
 
-interface CustomSessionClaims {
-  publicMetadata?: {
-    role?: string;
-  };
-}
+
 
 export async function GET() {
   await dbConnect();
@@ -30,10 +26,10 @@ export async function POST(req: Request) {
 
   const claims = sessionClaims as CustomSessionClaims;
 
-  // ✅ Use `publicMetadata`
-  // if (!userId || claims?.publicMetadata?.role !== 'admin') {
-  //   return NextResponse.json({ success: false, message: 'Unauthorized: Admin access required' }, { status: 403 });
-  // }
+   
+  if (!userId || claims?.public_metadata?.role !== 'admin') {
+    return NextResponse.json({ success: false, message: 'Unauthorized: Admin access required' }, { status: 403 });
+  }
 
   try {
     const body = await req.json();

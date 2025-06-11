@@ -52,7 +52,6 @@ const Hero = () => {
           className="w-2/5 h-1/2"
         />
       </div>
-      <div className="h-20 w-full relative bg-black z-10 text-white"></div>
     </div>
   );
 };

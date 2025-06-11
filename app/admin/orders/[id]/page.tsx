@@ -17,7 +17,7 @@ interface OrderDetailPageProps {
  */
 export default async function AdminOrderDetailPage({ params }: OrderDetailPageProps) {
   const { userId, sessionClaims } = await auth(); // Await auth()
-  const { id } = params;
+  const { id } = await params;
 
   // Explicitly cast sessionClaims to our custom type for better type inference
   const claims = sessionClaims as CustomSessionClaims;

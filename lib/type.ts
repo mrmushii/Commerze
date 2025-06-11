@@ -10,7 +10,8 @@ export interface IProduct extends Document {
   name: string;
   description: string;
   price: number;
-  imageUrl: string;
+  // REMOVED: imageUrl: string;
+  imageUrls: string[]; // NEW: Array of image URLs for multiple images
   category: string; // e.g., 'Men', 'Women', 'Kids' (Primary Category)
   type: 'Formal' | 'Casual' | 'Party' | 'Sportswear' | 'Other'; // Secondary Category: Type of clothing
   sizes: string[]; // e.g., ['S', 'M', 'L', 'XL']
@@ -28,7 +29,7 @@ export interface IProduct extends Document {
 export interface IOrderItem {
   productId: mongoose.Types.ObjectId; // Reference to Product ID
   name: string;
-  imageUrl: string;
+  imageUrl: string; // Keep imageUrl for order items as a snapshot
   price: number;
   quantity: number;
 }
@@ -56,9 +57,14 @@ export interface CartItem {
   productId: string; // Product ID as a string for frontend use
   name: string;
   price: number;
-  imageUrl: string;
+  imageUrl: string; // Keep imageUrl for cart items
   quantity: number;
 }
+
+/**
+ * Custom type for Clerk's sessionClaims to ensure 'metadata' and 'role' are recognized.
+ * This extends the default SessionClaims type from Clerk to include our custom publicMetadata.
+ */
 
 /**
  * Custom type for Clerk's sessionClaims to ensure 'metadata' and 'role' are recognized.

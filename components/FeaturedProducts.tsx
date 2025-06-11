@@ -85,7 +85,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ title = 'Featured C
             <Link href={`/products/${product._id.toString()}`}>
               <div className="relative w-full h-48">
                 <Image
-                  src={product.imageUrl}
+                  src={product.imageUrls?.[0] || `https://placehold.co/400x300/F0F0F0/ADADAD?text=No+Image`} // Safely access imageUrls[0]
                   alt={product.name}
                   layout="fill"
                   objectFit="cover"
@@ -96,7 +96,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ title = 'Featured C
               <div className="p-4">
                 <h3 className="text-lg font-semibold text-gray-800 truncate">{product.name}</h3>
                 <p className="text-gray-600 text-sm">{product.category} - {product.type}</p>
-                <p className="text-xl font-bold text-blue-600 mt-2">${product.price.toFixed(2)}</p>
+                <p className="text-xl font-bold text-blue-600 mt-2">${typeof product.price === 'number' ? product.price.toFixed(2) : product.price}</p> {/* Safely call toFixed */}
               </div>
             </Link>
           </div>
@@ -107,3 +107,4 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ title = 'Featured C
 };
 
 export default FeaturedProducts;
+

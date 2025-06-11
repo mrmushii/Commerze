@@ -37,7 +37,7 @@ export async function GET(req: Request, context: { params: { id: string } }) {
     console.log(`API/orders/[id] Order found: ${order._id}`);
 
     const claims = sessionClaims as CustomSessionClaims;
-    const isAdmin = claims?.metadata?.role === 'admin';
+    const isAdmin = claims?.public_metadata?.role === 'admin';
     if (order.userId !== userId && !isAdmin) {
       console.warn(`API/orders/[id] Forbidden access: Order userId ${order.userId} vs current userId ${userId}. Is Admin: ${isAdmin}`);
       return NextResponse.json({ success: false, message: 'Forbidden: You do not have access to this order' }, { status: 403 });
@@ -60,7 +60,7 @@ export async function PUT(req: Request, context: any) {
 
   const claims = sessionClaims as CustomSessionClaims;
 
-  if (!userId || claims?.publicMetadata?.role !== 'admin') {
+  if (!userId || claims?.public_metadata?.role !== 'admin') {
     return NextResponse.json(
       { success: false, message: 'Unauthorized: Admin access required' },
       { status: 403 }
@@ -104,7 +104,7 @@ export async function DELETE(req: Request, context: any) {
 
   const claims = sessionClaims as CustomSessionClaims;
 
-  if (!userId || claims?.publicMetadata?.role !== 'admin') {
+  if (!userId || claims?.public_metadata?.role !== 'admin') {
     return NextResponse.json(
       { success: false, message: 'Unauthorized: Admin access required' },
       { status: 403 }

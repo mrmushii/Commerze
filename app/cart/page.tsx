@@ -15,7 +15,7 @@ import { CartItem } from '@/lib/type'; // Import CartItem type
  */
 export default function CartPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Changed initial loading to true for data fetch
   const router = useRouter();
   const { isSignedIn, userId } = useAuth(); // Get Clerk's authentication state
 
@@ -25,6 +25,7 @@ export default function CartPage() {
     if (storedCart) {
       setCartItems(JSON.parse(storedCart));
     }
+    setLoading(false); // Set loading to false after attempting to load cart
   }, []);
 
   /**
@@ -119,7 +120,12 @@ export default function CartPage() {
     <div className="container mx-auto p-4 bg-white shadow-md rounded-lg">
       <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">Your Shopping Cart</h1>
 
-      {cartItems.length === 0 ? (
+      {loading ? ( // Display loading state
+        <div className="text-center p-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading cart...</p>
+        </div>
+      ) : cartItems.length === 0 ? (
         <p className="text-center text-gray-600 text-xl mt-8">Your cart is currently empty. Start shopping!</p>
       ) : (
         <>
@@ -127,14 +133,15 @@ export default function CartPage() {
             {cartItems.map((item) => (
               <div key={item.productId} className="flex items-center border border-gray-200 rounded-md p-4 shadow-sm">
                 <Image
-                  src={item.imageUrl}
+                  // FIX: Use item.imageUrl directly, ensure it's valid, provide robust fallback
+                  // Changed placeholder to PNG to avoid SVG errors with next/image
+                  src={item.imageUrl || `https://placehold.it/80x80.png?text=No+Image`} 
                   alt={item.name}
                   width={80}
                   height={80}
                   className="rounded-md object-cover mr-4"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = `https://placehold.co/80x80/F0F0F0/ADADAD?text=Img`;
-                  }}
+                  // Next.js Image handles onError more robustly internally, external onError might not be needed
+                  // but if included, ensure correct type HTMLImageElement
                 />
                 <div className="flex-grow">
                   <h2 className="text-lg font-semibold text-gray-800">{item.name}</h2>
@@ -180,6 +187,5 @@ export default function CartPage() {
     </div>
   );
 }
-
 
 

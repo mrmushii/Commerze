@@ -71,7 +71,7 @@ export default function SearchClient() {
                 <Link href={`/products/${product._id.toString()}`}>
                   <div className="relative w-full h-48 bg-gray-200">
                     <Image
-                      src={product.imageUrl}
+                      src={product.imageUrls?.[0]}
                       alt={product.name}
                       layout="fill"
                       objectFit="cover"

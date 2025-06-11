@@ -2,17 +2,13 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Products';
-import { IProduct } from '@/lib/type'; // Ensure correct import path for IProduct
+import { CustomSessionClaims, IProduct } from '@/lib/type'; // Ensure correct import path for IProduct
 
 /**
  * Define a custom type for Clerk's sessionClaims to ensure 'metadata' and 'role' are recognized.
  * This extends the default SessionClaims type from Clerk to include our custom publicMetadata.
  */
-interface CustomSessionClaims {
-  publicMetadata?: {
-    role?: string; // Make role optional as it might not always be present
-  };
-}
+
 
 /**
  * Handles GET requests to retrieve a single product by ID.
@@ -22,7 +18,7 @@ interface CustomSessionClaims {
  */
 export async function GET(req: Request, context: { params: { id: string } }) {
   await dbConnect(); // Ensure database connection
-  const { id } = context.params; // Get product ID from dynamic route
+  const { id } = await context.params; // Get product ID from dynamic route
 
   try {
     // Find product by ID
@@ -57,7 +53,7 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
   const claims = sessionClaims as CustomSessionClaims;
 
   // Check if user is authenticated and has 'admin' role
-  if (!userId || claims?.publicMetadata?.role !== 'admin') {
+  if (!userId || claims?.public_metadata?.role !== 'admin') {
     return NextResponse.json({ success: false, message: 'Unauthorized: Admin access required' }, { status: 403 });
   }
 
@@ -99,7 +95,7 @@ export async function DELETE(req: Request, context: { params: { id: string } }) 
   const claims = sessionClaims as CustomSessionClaims;
 
   // Check if user is authenticated and has 'admin' role
-  if (!userId || claims?.publicMetadata?.role !== 'admin') {
+  if (!userId || claims?.public_metadata?.role !== 'admin') {
     return NextResponse.json({ success: false, message: 'Unauthorized: Admin access required' }, { status: 403 });
   }
 

@@ -1,3 +1,4 @@
+// app/api/products/search/route.ts
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Products';

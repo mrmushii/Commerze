@@ -1,3 +1,4 @@
+// app/api/products/featured/route.ts
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Products';
@@ -51,7 +52,7 @@ export async function GET(req: Request) {
         },
         { $unwind: "$productDetails" }, // Deconstruct the productDetails array (since $lookup returns an array)
         { $replaceRoot: { newRoot: "$productDetails" } }, // Replace root with product details
-        { $project: { __v: 0 } }, // Exclude the __v field from the final output
+        { $project: { __v: 0 } }, // Exclude the __v field
       ]);
 
       // Filter out any products that might be null or undefined if lookup failed
@@ -61,9 +62,10 @@ export async function GET(req: Request) {
 
     } catch (aggError: unknown) { // Use 'unknown' for catch block error
       console.warn("Aggregation for most ordered products failed (or no orders yet), falling back to random:", aggError instanceof Error ? aggError.message : aggError);
-      // This might happen if 'products' collection name is not 'products', or if there are no orders yet.
-      // Continue to fetch random if aggregation fails or returns too few results.
+      // This might happen if 'products' collection name is not 'products' or other aggregation issues.
+      // Continue to fetch random if aggregation fails.
     }
+
 
     // --- Fallback: If not enough most ordered products, get random products ---
     if (featuredProducts.length < limit) {

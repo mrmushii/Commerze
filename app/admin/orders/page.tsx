@@ -1,3 +1,4 @@
+// app/admin/orders/page.tsx
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
@@ -18,7 +19,8 @@ export default async function AdminOrdersPage() {
   const claims = sessionClaims as CustomSessionClaims;
 
   // Redirect if not signed in or not an admin
-  if (!userId || claims?.public_metadata?.role !== 'admin') {
+  // Check for userId, then safely access role using optional chaining
+  if (!userId || claims?.public_metadata?.role !== 'admin') { // Use claims.metadata.role
     redirect('/sign-in');
   }
 
@@ -47,12 +49,9 @@ export default async function AdminOrdersPage() {
             </thead>
             <tbody>
               {orders.map((order) => (
-                // Explicitly cast order._id to mongoose.Types.ObjectId for toString()
+                // IMPORTANT: Ensure no whitespace (newlines/spaces) between <td> tags on the same line
                 <tr key={(order._id as mongoose.Types.ObjectId).toString()} className="hover:bg-gray-50 transition duration-150 ease-in-out">
-                  <td className="py-3 px-4 border-b text-gray-800 font-medium">{(order._id as mongoose.Types.ObjectId).toString().substring(0, 8)}...</td>
-                  <td className="py-3 px-4 border-b text-gray-600">{order.userId.substring(0, 8)}...</td> {/* Display partial userId */}
-                  <td className="py-3 px-4 border-b text-gray-800">${order.totalAmount.toFixed(2)}</td>
-                  <td className="py-3 px-4 border-b">
+                  <td className="py-3 px-4 border-b text-gray-800 font-medium">{(order._id as mongoose.Types.ObjectId).toString().substring(0, 8)}...</td><td className="py-3 px-4 border-b text-gray-600">{order.userId.substring(0, 8)}...</td><td className="py-3 px-4 border-b text-gray-800">${order.totalAmount.toFixed(2)}</td><td className="py-3 px-4 border-b">
                     <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                       order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
                       order.paymentStatus === 'failed' ? 'bg-red-100 text-red-800' :
@@ -60,18 +59,15 @@ export default async function AdminOrdersPage() {
                     }`}>
                       {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
                     </span>
-                  </td>
-                  <td className="py-3 px-4 border-b">
+                  </td><td className="py-3 px-4 border-b">
                     {/* Client component for updating status */}
                     <OrderStatusDropdown
                       orderId={(order._id as mongoose.Types.ObjectId).toString()}
                       currentStatus={order.orderStatus}
                     />
-                  </td>
-                  <td className="py-3 px-4 border-b text-gray-600">
+                  </td><td className="py-3 px-4 border-b text-gray-600">
                     {new Date(order.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="py-3 px-4 border-b">
+                  </td><td className="py-3 px-4 border-b">
                     <Link href={`/admin/orders/${(order._id as mongoose.Types.ObjectId).toString()}`} className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition">
                       Details
                     </Link>

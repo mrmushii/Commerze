@@ -1,11 +1,9 @@
-// app/admin/products/edit/[id]/page.tsx
-import { auth } from '@clerk/nextjs/server';
-import { redirect, notFound } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Product from '@/models/Products';
 import { IProduct, CustomSessionClaims } from '@/lib/type'; // Import CustomSessionClaims and IProduct
+import { auth } from '@clerk/nextjs/server';
+import { notFound, redirect } from 'next/navigation';
 import ProductForm from '@/components/admin/ProductForm';
-// Removed unused import: import mongoose from 'mongoose';
 
 
 /**
@@ -16,20 +14,18 @@ import ProductForm from '@/components/admin/ProductForm';
 export default async function EditProductPage({ params }: { params: { id: string } }) {
   const { userId, sessionClaims } = await auth(); // Await auth()
 
-  interface CustomSessionClaims {
-  public_metadata?: {
-    role?: string;
-  };
-}
+  const claims = sessionClaims as CustomSessionClaims; // Type assertion
 
-const claims = sessionClaims as CustomSessionClaims;
+  // Redirect if not signed in or not an admin
+  if (!userId || claims?.public_metadata?.role !== 'admin') {
+    redirect('/sign-in');
+  }
 
-if (!userId || claims?.public_metadata?.role !== 'admin') {
-  redirect('/sign-in');
-}
+  // FIX: Access params.id directly without 'await'. `params` is already resolved.
+  const { id } = await params;
 
   await dbConnect(); // Connect to MongoDB
-  const product: IProduct | null = await Product.findById(params.id); // Fetch product by ID
+  const product: IProduct | null = await Product.findById(id); // Fetch product by ID
 
   if (!product) {
     notFound(); // Display 404 if product not found

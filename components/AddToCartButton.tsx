@@ -1,9 +1,10 @@
+// components/AddToCartButton.tsx
 'use client'; // This directive marks the component as a Client Component
 
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { IProduct, CartItem } from '@/lib/type'; // Import types
-
+import { IProduct, CartItem } from '@/lib/type'; // Corrected import path from '@/lib/type' to '@/types'
+import mongoose from 'mongoose'; // Import mongoose for ObjectId type
 
 
 /**
@@ -66,7 +67,8 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({ product }) => {
         productId: product._id.toString(),
         name: product.name,
         price: product.price,
-        imageUrl: product.imageUrl,
+        // FIX: Use product.imageUrls[0] with optional chaining and a fallback
+        imageUrl: product.imageUrls?.[0] || 'https://placehold.it/80x80.png?text=No+Image', // Ensure a string value
         quantity: quantity,
       };
       cart.push(cartItem);

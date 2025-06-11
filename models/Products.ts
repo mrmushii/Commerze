@@ -7,7 +7,8 @@ const ProductSchema: Schema = new Schema(
     name: { type: String, required: true, trim: true }, // Product name (e.g., "Men's Casual Shirt")
     description: { type: String, required: true }, // Detailed description of the product
     price: { type: Number, required: true, min: 0 }, // Price of the product, must be non-negative
-    imageUrl: { type: String, required: true }, // URL to the product's image
+    // REMOVED: imageUrl: { type: String, required: true },
+    imageUrls: { type: [String], required: true, default: [] }, // NEW: Array of image URLs
     category: { type: String, required: true, trim: true }, // Primary Category: e.g., 'Men', 'Women', 'Kids'
     type: { // Secondary Category: Type of clothing
       type: String,

@@ -44,7 +44,7 @@ export async function GET(
       );
     }
 
-    const isAdmin = claims?.publicMetadata?.role === 'admin';
+    const isAdmin = claims?.public_metadata?.role === 'admin';
     const isOwner = order.userId === userId;
 
     if (!isAdmin && !isOwner) {

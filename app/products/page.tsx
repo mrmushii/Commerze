@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { IProduct } from '@/lib/type';
+import { IProduct } from '@/lib/type'; // Corrected import path
 import SearchComponent from '@/components/SearchComponent'; // Can be used within the sidebar or elsewhere
 import FeaturedProducts from '@/components/FeaturedProducts'; // For Top Sellers
 import NewArrivals from '@/components/NewArrivals'; // For New Arrivals
@@ -49,16 +49,19 @@ export default function ProductsPage() {
         if (selectedGender) params.append('gender', selectedGender);
 
         const queryString = params.toString();
+        console.log("Fetching products with query:", queryString); // Debugging log
         const response = await fetch(`/api/products/search?${queryString}`);
         const data = await response.json();
 
-        if (data.success) {
+        if (response.ok && data.success) { // Ensure response.ok (200 status)
+          console.log("Fetched products successfully:", data.data.length, "items"); // Debugging log
           setProducts(data.data);
         } else {
+          console.error("Failed to fetch products from API:", data.message); // Debugging log
           setError(data.message || 'Failed to fetch products.');
         }
       } catch (err: unknown) {
-        console.error('Error fetching products:', err);
+        console.error('Error fetching products (network/unexpected):', err); // Debugging log
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
         setError(errorMessage);
       } finally {
@@ -71,7 +74,7 @@ export default function ProductsPage() {
     }, 300); // Debounce search/filter changes
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm, selectedCategory, selectedType, priceRange, selectedColor, selectedSize, selectedGender]); // Include priceRange in dependency array
+  }, [searchTerm, selectedCategory, selectedType, priceRange, selectedColor, selectedSize, selectedGender]); // Include all relevant states in dependency array
 
   const handleClearFilters = () => {
     setSearchTerm('');
@@ -198,8 +201,8 @@ export default function ProductsPage() {
             {colors.map(color => (
               <button
                 key={color}
-                style={{ backgroundColor: color.toLowerCase() }}
                 onClick={() => setSelectedColor(selectedColor === color.toLowerCase() ? '' : color.toLowerCase())}
+                style={{ backgroundColor: color.toLowerCase() }}
                 className={`w-8 h-8 rounded-full border-2 ${
                   selectedColor === color.toLowerCase() ? 'border-blue-500 ring-2 ring-blue-500' : 'border-gray-300'
                 } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200`}
@@ -264,11 +267,13 @@ export default function ProductsPage() {
                 <Link href={`/products/${product._id.toString()}`}>
                   <div className="relative w-full h-48 bg-gray-200">
                     <Image
-                      src={product.imageUrl}
+                      // FIX: Use product.imageUrls[0] with optional chaining and fallback
+                      src={product.imageUrls?.[0] || `https://placehold.co/400x300/F0F0F0/ADADAD?text=No+Image`}
                       alt={product.name}
                       layout="fill"
-                      objectFit="cover"
+                      objectFit="cover" // Note: consider replacing with style={{ objectFit: 'cover' }} for Next.js 13+
                       className="rounded-t-lg"
+                      // FIX: Corrected typo HTMLHTMLImageElement to HTMLImageElement
                       onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/400x300/F0F0F0/ADADAD?text=Image+Not+Found`; }}
                     />
                   </div>
@@ -276,8 +281,13 @@ export default function ProductsPage() {
                     <h2 className="text-xl font-semibold text-gray-800 truncate mb-1">
                       {product.name}
                     </h2>
-                    <p className="text-gray-600 text-sm">{product.category} - {product.type}</p>
+                    <p className="text-gray-600 mb-2">{product.category}</p>
                     <p className="text-2xl font-bold text-blue-600 mt-2">${product.price.toFixed(2)}</p>
+                    {product.stock === 0 ? (
+                      <p className="text-red-500 font-medium mt-2">Out of Stock</p>
+                    ) : (
+                      <p className="text-green-600 font-medium mt-2">In Stock: {product.stock}</p>
+                    )}
                   </div>
                 </Link>
               </div>

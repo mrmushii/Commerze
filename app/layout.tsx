@@ -21,7 +21,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body >
-          <Navbar /> {/* Include the Navbar here */}
+          <Navbar /> 
           <main className="container  mx-auto p-4 mt-16">
             {children}
           </main>
