@@ -29,7 +29,7 @@ const Navbar = () => {
   const isAdminClient = isSignedIn && (user?.publicMetadata as CustomSessionClaims['metadata'])?.role === 'admin';
 
   return (
-    <nav className="py-6 px-12 flex justify-between items-center rounded-lg shadow-md m-2">
+    <nav className="py-6 px-12 flex justify-between items-center rounded-lg shadow-md m-2 z-50 sticky">
       <div className="text-3xl font-extrabold">
         <Link href="/">Commerze</Link>
       </div>

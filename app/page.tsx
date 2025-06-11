@@ -9,11 +9,17 @@ import Hero from '@/components/Hero';
 
 export default function HomePage() {
   return (
-    <div className="container mx-auto p-4 bg-secondary">
+    <div className="container mx-auto p-4 bg-secondary z-30 absolute">
       <Hero/>
-
+      <div className="h-20 w-full relative z-40 top-[-80px] bg-black text-white flex justify-around items-center">
+        <Image src={"/versage.png"} width={120} height={70} alt='logo'/>
+        <Image src={"/zara.png"} width={80} height={50} alt='logo'/>
+        <Image src={"/gucci.png"} width={120} height={70} alt='logo'/>
+        <Image src={"/prada.png"} width={120} height={70} alt='logo'/>
+        <Image src={"/calvin.png"} width={140} height={90} alt='logo'/>
+      </div>
       {/* Search Section */}
-      <section className="mb-10 bg-white">
+      <section className="mb-10 bg-white py-5">
         <h2 className="text-3xl font-bold text-center mb-6 text-gray-800 bg-white z-20">Find Your Perfect Outfit</h2>
         <SearchComponent /> {/* Integrated Search Component */}
         <p className="text-center text-gray-600 mt-4">
