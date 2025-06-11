@@ -7,6 +7,7 @@ import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order'; // Corrected import path for Order
 import Product from '@/models/Products'; // Corrected import path for Product
 import { IOrder, CartItem } from '@/lib/type'; // Corrected import path for IOrder and CartItem
+import mongoose from 'mongoose';
 
 // Initialize Stripe with your secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -40,95 +41,127 @@ export async function POST(req: Request) {
 
   let event: Stripe.Event;
 
+  console.log('--- Webhook Start ---');
+  console.log('Webhook Request Headers:', (await headers()).entries());
+  console.log('Webhook Raw Body Length:', rawBody.length);
+  console.log('Webhook Signature:', signature);
+  console.log('Webhook Secret (from .env):', webhookSecret ? '******' : 'MISSING!'); // Mask secret
+
   try {
     if (!signature || !webhookSecret) {
-      console.error('Stripe-Signature header or STRIPE_WEBHOOK_SECRET missing.');
+      console.error('Webhook: Signature or Secret missing.');
       return NextResponse.json({ success: false, message: 'Webhook secret or signature missing.' }, { status: 400 });
     }
     // Verify the webhook signature
     event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+    console.log('Webhook: Signature verification SUCCESS.');
   } catch (err: unknown) { // Changed 'any' to 'unknown'
-    console.error(`Webhook signature verification failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    console.error(`Webhook: Signature verification FAILED: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    console.log('Webhook: Full error object:', err); // Log full error for more details
     return NextResponse.json({ success: false, message: `Webhook Error: ${err instanceof Error ? err.message : 'Unknown error'}` }, { status: 400 });
   }
 
   await dbConnect(); // Ensure database connection
+  console.log('Webhook: Database Connected.');
 
   try {
     // Handle different event types
     switch (event.type) {
       case 'checkout.session.completed':
         const session = event.data.object as Stripe.Checkout.Session;
-        console.log('Stripe Webhook: checkout.session.completed event received.');
+        console.log('Webhook: Processing checkout.session.completed event.');
+        console.log('Webhook: Stripe Session ID:', session.id); // Log the session ID from webhook
+        console.log('Webhook: Stripe Metadata:', session.metadata); // Log all metadata
 
         // Extract relevant data from session metadata
         const userId = session.metadata?.userId;
-        const cart: CartItem[] = JSON.parse(session.metadata?.cart || '[]');
+        let cart: CartItem[] = [];
+        try {
+            cart = JSON.parse(session.metadata?.cart || '[]') as CartItem[];
+        } catch (parseError) {
+            console.error('Webhook: Failed to parse cart metadata:', parseError);
+            return NextResponse.json({ received: true, message: 'Invalid cart metadata.' }, { status: 400 });
+        }
+
         const totalAmount = session.amount_total ? session.amount_total / 100 : 0; // Convert cents to dollars
 
+        console.log('Webhook: Parsed userId:', userId);
+        console.log('Webhook: Parsed cart (first item):', cart.length > 0 ? cart[0] : 'empty');
+        console.log('Webhook: Calculated totalAmount:', totalAmount);
+
+
         if (!userId || cart.length === 0 || totalAmount === 0) {
-          console.error('Missing data in checkout.session.completed metadata.');
+          console.error('Webhook: Missing data in checkout.session.completed metadata (userId, cart, or totalAmount).');
           return NextResponse.json({ received: true, message: 'Missing metadata.' }, { status: 400 }); // Return 400 to Stripe
         }
 
         // 1. Create a new Order in your database
         // First, check if an order with this stripeSessionId already exists to prevent duplicates
+        console.log('Webhook: Checking for existing order with stripeSessionId:', session.id);
         const existingOrder = await Order.findOne({ stripeSessionId: session.id });
         if (existingOrder) {
-          console.warn(`Order with Stripe Session ID ${session.id} already exists. Skipping creation.`);
+          console.warn(`Webhook: Order with Stripe Session ID ${session.id} already exists. Skipping creation.`);
           return NextResponse.json({ received: true, message: 'Order already exists.' }, { status: 200 });
         }
 
-        const newOrder: IOrder = await Order.create({
-          userId: userId,
-          items: cart,
-          totalAmount: totalAmount,
-          paymentStatus: 'paid', // Mark as paid
-          orderStatus: 'pending', // Initial order fulfillment status
-          stripeSessionId: session.id,
-        });
-        console.log('New Order Created:', newOrder._id);
+        console.log('Webhook: Attempting to create new order...');
+        try {
+            const newOrder: IOrder = await Order.create({
+                userId: userId,
+                items: cart,
+                totalAmount: totalAmount,
+                paymentStatus: 'paid', // Mark as paid
+                orderStatus: 'pending', // Initial order fulfillment status
+                stripeSessionId: session.id, // Ensure this is correctly set
+            });
+            console.log('Webhook: New Order Created in DB with ID:', newOrder._id.toString());
+            console.log('Webhook: New Order stripeSessionId saved as:', newOrder.stripeSessionId);
 
-        // 2. Decrement product stock based on `cart`
-        // Iterate through each item in the cart and update product stock
-        for (const item of cart) {
-          const product = await Product.findById(item.productId);
-          if (product) {
-            // Ensure stock doesn't go below zero
-            const newStock = Math.max(0, product.stock - item.quantity);
-            await Product.findByIdAndUpdate(item.productId, { stock: newStock });
-            console.log(`Updated stock for product ${item.name}: ${product.stock} -> ${newStock}`);
-          } else {
-            console.warn(`Product with ID ${item.productId} not found for stock decrement.`);
-          }
+            // 2. Decrement product stock based on `cart`
+            console.log('Webhook: Attempting to decrement product stock...');
+            for (const item of cart) {
+                const product = await Product.findById(item.productId);
+                if (product) {
+                    const newStock = Math.max(0, product.stock - item.quantity);
+                    await Product.findByIdAndUpdate(item.productId, { stock: newStock });
+                    console.log(`Webhook: Updated stock for product ${item.name}: ${product.stock} -> ${newStock}`);
+                } else {
+                    console.warn(`Webhook: Product with ID ${item.productId} not found for stock decrement.`);
+                }
+            }
+            console.log('Webhook: Stock decrement process complete.');
+
+        } catch (createError: unknown) {
+            console.error('Webhook: ERROR during Order creation or stock update:', createError);
+            // Log Mongoose validation errors if available
+            if (createError instanceof mongoose.Error.ValidationError) {
+                console.error('Webhook: Mongoose Validation Errors:', createError.errors);
+            }
+            // Return a non-200 status to Stripe to signal failure and trigger retry
+            return NextResponse.json({ success: false, message: `Order creation failed: ${createError instanceof Error ? createError.message : 'Unknown error'}` }, { status: 500 });
         }
         break;
 
       // Handle other event types as needed
       case 'payment_intent.succeeded':
-        // Handle successful payment intents (if you use Payment Intents API directly)
-        console.log('Stripe Webhook: payment_intent.succeeded event received.');
+        console.log('Webhook: payment_intent.succeeded event received.');
         break;
       case 'charge.failed':
-        // Fix: Removed 'failedCharge' variable assignment as it's not used, resolving no-unused-vars error
-        console.log('Stripe Webhook: charge.failed event received.');
-        // const failedCharge = event.data.object as Stripe.Charge; // Removed
-        // You might want to update order payment status to 'failed' here
-        // based on metadata from the Payment Intent if available
+        console.log('Webhook: charge.failed event received.');
         break;
       default:
-        console.log(`Unhandled event type ${event.type}`);
+        console.log(`Webhook: Unhandled event type ${event.type}`);
     }
 
+    console.log('Webhook: Event processing complete. Returning 200 OK.');
     // Return a 200 response to Stripe to acknowledge receipt of the event
     return NextResponse.json({ received: true }, { status: 200 });
   } catch (error: unknown) { // Changed 'any' to 'unknown'
-    console.error('Error processing webhook event:', error);
+    console.error('Webhook: Top-level ERROR processing webhook event:', error);
     // Return a 500 response if your server encounters an error during processing
-    // Type guard for error message
     return NextResponse.json({ success: false, message: `Error processing webhook: ${error instanceof Error ? error.message : 'Unknown error'}` }, { status: 500 });
+  } finally {
+    console.log('--- Webhook End ---');
   }
 }
-
-
 

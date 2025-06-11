@@ -1,7 +1,7 @@
 // app/products/search/page.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import SearchComponent from '@/components/SearchComponent';
 import { IProduct } from '@/lib/type';
@@ -58,7 +58,13 @@ export default function SearchResultsPage() {
       <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">Search Results</h1>
 
       {/* The SearchComponent here will handle input and filters, and update the URL */}
-      <SearchComponent isSearchResultsPage={true} />
+      <Suspense fallback={
+          <div className="text-center p-8">
+            <p className="text-gray-600">Loading search options...</p>
+          </div>
+        }>
+          <SearchComponent /> {/* Integrated Search Component */}
+        </Suspense>
 
       <section className="my-8">
         {loading ? (
