@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { useAuth } from '@clerk/nextjs'; // Get Clerk's authentication status
-import { CartItem } from '@/types'; // Import CartItem type
+import { CartItem } from '@/lib/type'; // Import CartItem type
 import { Trash2, Plus, Minus } from 'lucide-react'; // Import icons for cart actions
 import { dispatchCartUpdateEvent } from '@/lib/cartEvents'; // Import custom event dispatcher
 import Link from 'next/link';
