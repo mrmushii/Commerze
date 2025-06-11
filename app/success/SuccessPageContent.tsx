@@ -98,7 +98,7 @@ export function SuccessPageContent() {
             **Order ID:** <span className="font-semibold text-blue-600">{order._id.toString().substring(0, 8)}...</span>
           </p>
           <p className="text-md text-gray-700 mb-2">
-            **Stripe Session ID:** <span className="font-semibold text-blue-600 overflow-x-hidden">{sessionId}</span>
+            **Stripe Session ID:** <span className="font-semibold text-blue-600 ">{sessionId}</span>
           </p>
           <p className="text-md text-gray-700">
             **Total Amount:** <span className="font-bold text-blue-700">${order.totalAmount.toFixed(2)}</span>

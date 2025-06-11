@@ -37,6 +37,7 @@ const productFormSchema = z.object({
   material: z.string().min(1, { message: 'Material is required.' }),
   gender: z.enum(['Men', 'Women', 'Kids', 'Unisex'], { message: 'Invalid gender selected.' }),
   stock: z.coerce.number().min(0, { message: 'Stock must be a non-negative number.' }),
+  discount:z.coerce.number().min(0,{message:'GIve discount if you want'})
 });
 
 // Infer the form values type from the schema
@@ -68,6 +69,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
       material: '',
       gender: 'Unisex',
       stock: 0,
+      discount:0,
     },
   });
 
@@ -178,6 +180,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
         material: initialData.material,
         gender: initialData.gender,
         stock: initialData.stock,
+        discount:initialData.discount,
       });
       setExistingImageUrls(initialData.imageUrls || []);
     }
@@ -448,6 +451,19 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
           id="stock"
           min="0"
           {...register('stock')} // Zod handles coercion
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+        />
+        {errors.stock && <p className="mt-1 text-sm text-red-600">{errors.stock.message}</p>}
+      </div>
+      <div>
+        <label htmlFor="discount" className="block text-sm font-medium text-gray-700 mb-1">
+          Discount Percentage
+        </label>
+        <input
+          type="number"
+          id="discount"
+          min="0"
+          {...register('discount')} // Zod handles coercion
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
         />
         {errors.stock && <p className="mt-1 text-sm text-red-600">{errors.stock.message}</p>}

@@ -4,8 +4,8 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { IProduct, CartItem } from '@/lib/type'; // Corrected import path from '@/lib/type' to '@/types'
-import mongoose from 'mongoose'; // Import mongoose for ObjectId type
-
+// Removed unnecessary import: import mongoose from 'mongoose';
+import { dispatchCartUpdateEvent } from '@/lib/cartEvents'; // Import the custom event dispatcher
 
 /**
  * Props for AddToCartButton.
@@ -25,6 +25,9 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({ product }) => {
 
   // Check if the product is out of stock
   const isOutOfStock = product.stock <= 0;
+
+  // Define a fallback image URL for cart items if the product has no images
+  const defaultPlaceholderImage = 'https://placehold.it/80x80.png?text=No+Image';
 
   /**
    * Handles adding the product to the cart.
@@ -47,7 +50,7 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({ product }) => {
 
     // Retrieve current cart from localStorage
     const storedCart = localStorage.getItem('cart');
-    const cart: CartItem[] = storedCart ? JSON.parse(storedCart) : []; // Changed 'let' to 'const'
+    const cart: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
 
     // Find if item already exists in cart
     const existingItemIndex = cart.findIndex(item => item.productId === product._id.toString());
@@ -67,9 +70,10 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({ product }) => {
         productId: product._id.toString(),
         name: product.name,
         price: product.price,
-        // FIX: Use product.imageUrls[0] with optional chaining and a fallback
-        imageUrl: product.imageUrls?.[0] || 'https://placehold.it/80x80.png?text=No+Image', // Ensure a string value
+        // FIX: Ensure imageUrl is taken from product.imageUrls[0] with a robust fallback
+        imageUrl: product.imageUrls?.[0] || defaultPlaceholderImage, // Safely access first image
         quantity: quantity,
+        discount:product.discount,
       };
       cart.push(cartItem);
       toast.success(`${product.name} added to cart!`);
@@ -77,6 +81,7 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({ product }) => {
 
     // Save updated cart to localStorage
     localStorage.setItem('cart', JSON.stringify(cart));
+    dispatchCartUpdateEvent(); // Dispatch custom event to notify Navbar about cart update
   };
 
   return (
@@ -86,7 +91,7 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({ product }) => {
         min="1"
         value={quantity}
         onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))} // Ensure quantity is at least 1
-        className="w-24 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+        className="w-24 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
         disabled={isOutOfStock} // Disable input if out of stock
       />
       <button

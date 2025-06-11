@@ -10,7 +10,8 @@ const nextConfig: NextConfig = {
    images: {
     domains: ['www.lg.com', 'placehold.co', 'another-domain.com',
        'via.placeholder.com', // Add this hostname
-      'placehold.it',      
+      'placehold.it',  
+      'img.clerk.com',    
     ], // Add all your external image hosts here
   },
 };

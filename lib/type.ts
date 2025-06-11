@@ -1,3 +1,4 @@
+// types.ts (or lib/types.ts)
 import { Document } from 'mongoose';
 import mongoose from 'mongoose'; // Import mongoose here for ObjectId type
 
@@ -19,9 +20,25 @@ export interface IProduct extends Document {
   material: string; // e.g., 'Cotton', 'Polyester', 'Denim'
   gender: 'Men' | 'Women' | 'Kids' | 'Unisex'; // More specific gender category
   stock: number;
+  discount:number;
+  // NEW: Fields for reviews summary
+  averageRating: number; // Calculated average rating based on all reviews
+  reviewCount: number;   // Total number of reviews
   createdAt: Date;
   updatedAt: Date;
 }
+
+/**
+ * NEW: Interface for a plain data representation of a Product.
+ * This is IProduct without the Mongoose Document methods,
+ * and with Date objects stringified (as they are by JSON.parse/stringify).
+ */
+export interface IProductData extends Omit<IProduct, keyof Document | 'createdAt' | 'updatedAt'> {
+  _id: string; // Ensure _id is a string when it's a plain object
+  createdAt: string; // Dates are stringified by JSON.parse/stringify
+  updatedAt: string;
+}
+
 
 /**
  * Interface for an item within an Order.
@@ -32,6 +49,7 @@ export interface IOrderItem {
   imageUrl: string; // Keep imageUrl for order items as a snapshot
   price: number;
   quantity: number;
+  discount:number
 }
 
 /**
@@ -59,6 +77,22 @@ export interface CartItem {
   price: number;
   imageUrl: string; // Keep imageUrl for cart items
   quantity: number;
+  discount:number
+}
+
+/**
+ * NEW: Interface for a Review document in MongoDB.
+ */
+export interface IReview extends Document {
+  _id: mongoose.Types.ObjectId;
+  productId: mongoose.Types.ObjectId; // The product this review belongs to
+  userId: string;                   // The Clerk userId of the reviewer
+  userName: string;                 // The name of the reviewer (e.g., from Clerk user object)
+  userImageUrl?: string;            // Reviewer's profile image (optional)
+  rating: number;                   // 1-5 star rating
+  comment: string;                  // The review text
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 /**
@@ -66,10 +100,7 @@ export interface CartItem {
  * This extends the default SessionClaims type from Clerk to include our custom publicMetadata.
  */
 
-/**
- * Custom type for Clerk's sessionClaims to ensure 'metadata' and 'role' are recognized.
- * This extends the default SessionClaims type from Clerk to include our custom publicMetadata.
- */
+
 export interface CustomSessionClaims {
   public_metadata?: {
     role?: string;

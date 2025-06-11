@@ -4,14 +4,14 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { notFound, useParams } from 'next/navigation'; // useParams for client-side params
-import dbConnect from '@/lib/dbConnect'; // Still imported for initial static/server data fetch context if page was SSR
-import Product from '@/models/Products'; // Imported for type definition, actual fetch via API
-import { IProduct } from '@/lib/type';
-import AddToCartButton from '@/components/AddToCartButton'; // Reusable AddToCart component
-import ImageWithFallback from '@/components/ImageWithFallback'; // For image error handling
+import { IProduct, IProductData } from '@/lib/type'; // Corrected import path for IProduct and IProductData
+import AddToCartButton from '@/components/AddToCartButton';
+import ImageWithFallback from '@/components/ImageWithFallback';
 import mongoose from 'mongoose'; // For ObjectId validation
 import axios from 'axios'; // Import axios for client-side fetching
 import Link from 'next/link';
+import FeaturedProducts from '@/components/FeaturedProducts';
+import ReviewSection from '@/components/ReviewSection';
 
 interface ProductDetailPageProps {
   // `params` are passed as props to Server Components by Next.js.
@@ -24,12 +24,19 @@ export default function ProductDetailPage() {
   const params = useParams(); // Get params client-side
   const id = params.id as string; // Assert type to string
 
-  const [product, setProduct] = useState<IProduct | null>(null);
+  const [product, setProduct] = useState<IProductData | null>(null); // Changed state type to IProductData
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mainImage, setMainImage] = useState<string>(''); // For the main displayed image
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [selectedSize, setSelectedSize] = useState<string>('');
+
+  // Function to update product's average rating and count (passed to ReviewSection)
+  const handleRatingUpdated = (averageRating: number, reviewCount: number) => {
+    if (product) {
+      setProduct(prevProduct => prevProduct ? { ...prevProduct, averageRating, reviewCount } : null);
+    }
+  };
 
   // Fetch product data on component mount
   useEffect(() => {
@@ -37,38 +44,37 @@ export default function ProductDetailPage() {
       if (!id || !mongoose.Types.ObjectId.isValid(id)) {
         setError('Invalid product ID.');
         setLoading(false);
-        notFound(); // Redirect to 404 if ID is invalid
+        notFound();
         return;
       }
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`/api/products/${id}`); // Fetch from your API route
-        const data = response.data; // Access data directly from axios response
+        const response = await axios.get(`/api/products/${id}`);
+        const data = response.data;
 
-        if (response.status === 200 && data.success) { // Check response.status and data.success
-          const fetchedProduct: IProduct = data.data;
+        if (response.status === 200 && data.success) {
+          const fetchedProduct: IProductData = data.data; // Ensure data.data is assigned to IProductData
           setProduct(fetchedProduct);
-          // FIX: Safely access imageUrls[0] for main image, fallback to old imageUrl if exists, then placeholder
           setMainImage(fetchedProduct.imageUrls?.[0] || `https://placehold.co/400x400/F0F0F0/ADADAD?text=No+Image`);
-          setSelectedColor(fetchedProduct.colors?.[0] || ''); // Select first available color
-          setSelectedSize(fetchedProduct.sizes?.[0] || '');   // Select first available size
+          setSelectedColor(fetchedProduct.colors?.[0] || '');
+          setSelectedSize(fetchedProduct.sizes?.[0] || '');
         } else {
           setError(data.message || 'Failed to fetch product details.');
-          notFound(); // Redirect to 404 if product not found on API call
+          notFound();
         }
       } catch (err: unknown) {
         console.error('Error fetching product:', err);
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
         setError(errorMessage);
-        notFound(); // Redirect to 404 on network error or unexpected issues
+        notFound();
       } finally {
         setLoading(false);
       }
     };
 
     fetchProduct();
-  }, [id]); // Re-fetch if ID changes (though unlikely for a detail page)
+  }, [id]);
 
   if (loading) {
     return (
@@ -89,16 +95,20 @@ export default function ProductDetailPage() {
     );
   }
 
-  // Dummy rating (you might fetch this from product data or a review system)
-  const rating = 4.5;
-  const originalPrice = product.price * 1.2; // Example: 20% higher than current price
-  const discountPercentage = Math.round(((originalPrice - product.price) / originalPrice) * 100);
+  const rating = product.averageRating || 0; // Use actual averageRating
+  // FIX: Calculate originalPrice using product.price and product.discount
+  const originalPrice = typeof product.price === 'number' && typeof product.discount === 'number'
+    ? product.price / (1 - product.discount / 100) // Calculate original price based on discount
+    : product.price * 1.2; // Fallback if discount is not a number or not present
 
-  // Use product.imageUrls directly, as product.imageUrl is removed
+  // FIX: Use product.discount directly
+  const displayDiscountPercentage = typeof product.discount === 'number' ? product.discount : Math.round(((originalPrice - product.price) / originalPrice) * 100);
+
   const productImages = product.imageUrls;
 
   return (
-    <div className="container mx-auto p-8 bg-white shadow-lg rounded-lg flex flex-col md:flex-row gap-8 mt-10">
+    <div>
+      <div className="container mx-auto p-8 bg-white shadow-lg rounded-lg flex flex-col md:flex-row gap-8 mt-10">
       {/* Left Column: Image Gallery */}
       <div className="md:w-1/2 flex flex-col items-center">
         {/* Main Product Image */}
@@ -143,16 +153,21 @@ export default function ProductDetailPage() {
       <div className="md:w-1/2 p-4">
         <h1 className="text-4xl font-extrabold text-gray-900 mb-2">{product.name}</h1>
         <div className="flex items-center mb-4 text-yellow-500">
+          {/* Display actual product rating stars */}
           {[...Array(5)].map((_, i) => (
-            <svg key={i} className={`w-5 h-5 ${i < Math.floor(rating) ? 'fill-current' : 'fill-none'}`} viewBox="0 0 24 24" stroke="currentColor" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.324 1.118l1.519 4.674c.3.921-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.519-4.674a1 1 0 00-.324-1.118L2.203 9.091c-.783-.57-.381-1.81.588-1.81h4.915a1 1 0 00.95-.69l1.519-4.674z"></path></svg>
+            <svg key={i} className={`w-5 h-5 ${i < Math.floor(rating) ? 'fill-current' : 'fill-none'}`} viewBox="0 0 24 24" stroke="currentColor" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.324 1.118l1.519 4.674c.3.921-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.519-4.674a1 1 0 00-.324-1.118L2.203 9.091c-.783-.57-.381-1.81.588-1.81h4.915a1 1 0 00.95-.69l1.519-4.674z"></path></svg>
           ))}
-          <span className="text-gray-600 ml-2 text-sm">{rating}/5</span>
+          <span className="text-gray-600 ml-2 text-sm">{rating.toFixed(1)}/5 ({product.reviewCount} reviews)</span>
         </div>
 
         <div className="mb-4">
           <span className="text-5xl font-bold text-red-600 mr-3">${typeof product.price === 'number' ? product.price.toFixed(2) : product.price}</span>
-          <span className="text-xl text-gray-500 line-through mr-2">${typeof originalPrice === 'number' ? originalPrice.toFixed(2) : originalPrice}</span>
-          <span className="text-lg font-bold text-green-600">-{discountPercentage}%</span>
+          {displayDiscountPercentage > 0 && ( // Conditionally show original price and discount if there's a discount
+            <>
+              <span className="text-xl text-gray-500 line-through mr-2">${typeof originalPrice === 'number' ? originalPrice.toFixed(2) : originalPrice}</span>
+              <span className="text-lg font-bold text-green-600">-{displayDiscountPercentage}%</span>
+            </>
+          )}
         </div>
 
         <p className="text-gray-700 leading-relaxed mb-6">{product.description}</p>
@@ -175,7 +190,7 @@ export default function ProductDetailPage() {
                 title={color}
               >
                 {selectedColor === color && (
-                    <svg className="h-full w-full text-white" fill="currentColor" viewBox="0 0 24 24" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)">
+                    <svg className="h-full w-full text-white" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                     </svg>
                 )}
@@ -209,6 +224,16 @@ export default function ProductDetailPage() {
           <AddToCartButton product={product} />
         )}
       </div>
+      </div> {/* Closing div for the first main section */}
+
+      {/* Review Section */}
+      <ReviewSection
+        productId={product._id.toString()} // Pass product ID as string
+        onRatingUpdated={handleRatingUpdated} // Pass the callback
+      />
+
+      {/* You Might Also Love Section */}
+      <FeaturedProducts title="You Might Also Love" limit={4} />
     </div>
   );
 }

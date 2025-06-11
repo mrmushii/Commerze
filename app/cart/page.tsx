@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { useAuth } from '@clerk/nextjs'; // Get Clerk's authentication status
-import { CartItem } from '@/lib/type'; // Import CartItem type
+import { CartItem } from '@/types'; // Import CartItem type
 import { Trash2, Plus, Minus } from 'lucide-react'; // Import icons for cart actions
 import { dispatchCartUpdateEvent } from '@/lib/cartEvents'; // Import custom event dispatcher
 import Link from 'next/link';
@@ -24,11 +24,11 @@ export default function CartPage() {
 
   // Dummy values for Order Summary (replace with actual calculations/logic if needed)
   const deliveryFee = 15; // Example fixed delivery fee
-  const dummyDiscount = 0.20; // Example 20% discount
+  // Removed dummyDiscount, will use item.discount now
 
   // Function to load cart from localStorage
   const loadCartFromLocalStorage = () => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') { // Ensure client-side
       const storedCart = localStorage.getItem('cart');
       const cart: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
       setCartItems(cart);
@@ -88,21 +88,26 @@ export default function CartPage() {
   };
 
   /**
-   * Calculates the total discount.
+   * Calculates the total discount amount for all items in the cart.
    * @returns {number} The total discount amount.
    */
-  const calculateDiscountAmount = () => {
-    return calculateSubtotal() * dummyDiscount;
+  const calculateTotalDiscountAmount = () => {
+    return cartItems.reduce((totalDiscount, item) => {
+        // Ensure item.price and item.discount are numbers
+        const price = typeof item.price === 'number' ? item.price : 0;
+        const discount = typeof item.discount === 'number' ? item.discount : 0;
+        return totalDiscount + (price * item.quantity * (discount / 100));
+    }, 0);
   };
 
   /**
-   * Calculates the final total amount including subtotal, discount, and delivery fee.
+   * Calculates the final total amount including subtotal, total discount, and delivery fee.
    * @returns {number} The final total.
    */
-  const calculateTotal = () => {
+  const calculateFinalTotal = () => {
     const subtotal = calculateSubtotal();
-    const discount = calculateDiscountAmount();
-    return (subtotal - discount + deliveryFee);
+    const totalDiscount = calculateTotalDiscountAmount();
+    return (subtotal - totalDiscount + deliveryFee);
   };
 
 
@@ -132,6 +137,8 @@ export default function CartPage() {
           name: item.name,
           price: item.price,
           imageUrl: item.imageUrl,
+          // IMPORTANT: If you need discount info in OrderItems in DB, pass it here too
+          discount: item.discount // Pass discount from CartItem to backend
         })),
         userId: userId, // Pass Clerk's userId to backend
       });
@@ -143,9 +150,9 @@ export default function CartPage() {
       } else {
         toast.error('Failed to get checkout URL.', { id: 'checkout' });
       }
-    } catch (error: unknown) {
+    } catch (error: unknown) { // Changed 'any' to 'unknown'
       console.error('Checkout error:', error);
-      if (axios.isAxiosError(error) && error.response?.data?.message) {
+      if (axios.isAxiosError(error) && error.response?.data?.message) { // Type guard for AxiosError
         toast.error(error.response.data.message, { id: 'checkout' });
       } else if (error instanceof Error) {
         toast.error(error.message || 'An unexpected error occurred during checkout.', { id: 'checkout' });
@@ -159,6 +166,11 @@ export default function CartPage() {
 
   return (
     <div className="container mx-auto mt-8 px-4">
+      {/* Breadcrumbs */}
+      <div className="text-gray-600 text-sm mb-4">
+        <Link href="/" className="hover:underline">Home</Link> &gt; Cart
+      </div>
+
       <h1 className="text-4xl font-extrabold text-gray-900 mb-8 tracking-tight">YOUR CART</h1>
 
       {loading ? (
@@ -190,8 +202,16 @@ export default function CartPage() {
                   <div className="flex justify-between items-start">
                     <div>
                       <h2 className="text-lg font-semibold text-gray-800">{item.name}</h2>
-                      {/* You might want to add size/color to CartItem interface if you have them */}
-                      <p className="text-sm text-gray-500">Size: M, Color: Blue</p> {/* Dummy for now */}
+                      {/* Dynamically show discount if applicable */}
+                      {typeof item.discount === 'number' && item.discount > 0 ? (
+                        <p className="text-sm text-gray-500">
+                          <span className="line-through mr-1">${item.price.toFixed(2)}</span>
+                          <span className="text-red-500 font-medium">${(item.price * (1 - item.discount / 100)).toFixed(2)}</span>
+                          <span className="ml-1 text-green-600">(-{item.discount}%)</span>
+                        </p>
+                      ) : (
+                        <p className="text-sm text-gray-500">Price per unit</p> // Or show size/color here
+                      )}
                     </div>
                     <button
                       onClick={() => removeItem(item.productId)}
@@ -201,7 +221,10 @@ export default function CartPage() {
                       <Trash2 className="w-5 h-5" />
                     </button>
                   </div>
-                  <p className="text-2xl font-bold text-gray-900 mt-2">${item.price.toFixed(2)}</p>
+                  {/* Display discounted price if applicable, otherwise original price */}
+                  <p className="text-2xl font-bold text-gray-900 mt-2">
+                    ${(typeof item.discount === 'number' && item.discount > 0 ? (item.price * (1 - item.discount / 100)) : item.price).toFixed(2)}
+                  </p>
                   
                   {/* Quantity Controls */}
                   <div className="flex items-center space-x-2 mt-3 bg-gray-100 rounded-full px-2 py-1 w-fit">
@@ -233,10 +256,12 @@ export default function CartPage() {
               <span>Subtotal</span>
               <span className="font-semibold">${calculateSubtotal().toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-gray-700">
-              <span>Discount ({dummyDiscount * 100}%)</span>
-              <span className="font-semibold text-red-600">-${calculateDiscountAmount().toFixed(2)}</span>
-            </div>
+            {calculateTotalDiscountAmount() > 0 && ( // Conditionally show discount row
+              <div className="flex justify-between text-gray-700">
+                <span>Discount</span>
+                <span className="font-semibold text-red-600">-${calculateTotalDiscountAmount().toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-gray-700">
               <span>Delivery Fee</span>
               <span className="font-semibold">${deliveryFee.toFixed(2)}</span>
@@ -244,7 +269,7 @@ export default function CartPage() {
 
             <div className="border-t border-gray-200 pt-4 mt-4 flex justify-between items-center text-xl font-bold text-gray-900">
               <span>Total</span>
-              <span>${calculateTotal().toFixed(2)}</span>
+              <span>${calculateFinalTotal().toFixed(2)}</span>
             </div>
 
             {/* Promo Code Input */}
