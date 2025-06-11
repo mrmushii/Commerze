@@ -6,7 +6,7 @@ import Order from '@/models/Order';
 import { IOrder } from '@/lib/type';
 import Link from 'next/link';
 import mongoose from 'mongoose'; // Import mongoose for type safety
-import Image from 'next/image';
+import Image from 'next/image'; // Import Next.js Image component
 
 /**
  * User Order History Page.
@@ -55,7 +55,13 @@ export default async function UserOrdersPage() {
                   {order.items.map((item, itemIndex) => (
                     <li key={itemIndex} className="flex items-center space-x-3 text-gray-700">
                       {/* Use next/image component instead of img tag */}
-                      <Image src={item.imageUrl} alt={item.name} width={48} height={48} className="w-12 h-12 object-cover rounded-md" />
+                      <Image
+                        src={item.imageUrl}
+                        alt={item.name}
+                        width={48} // Define width
+                        height={48} // Define height
+                        className="w-12 h-12 object-cover rounded-md" // Tailwind classes for sizing
+                      />
                       <span>{item.name} x {item.quantity} - ${item.price.toFixed(2)} each</span>
                     </li>
                   ))}

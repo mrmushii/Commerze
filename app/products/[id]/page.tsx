@@ -14,7 +14,7 @@ interface ProductDetailPageProps {
 }
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
-  const { id } = params;
+  const { id } = await  params;
 
   if (!id) {
     notFound();

@@ -8,57 +8,71 @@ import axios from 'axios';
 import { IOrder } from '@/lib/type'; // Import IOrder type
 
 /**
- * Success Page after a successful Stripe Checkout.
- * Displays a success message and order details (if available).
+ * Success Page content component.
+ * Fetches order details after a successful Stripe Checkout using polling.
  */
 function SuccessPageContent() { // Renamed to SuccessPageContent
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id'); // Get Stripe sessionId from query params
   const [order, setOrder] = useState<IOrder | null>(null);
   const [loading, setLoading] = useState(true);
+  const [attempts, setAttempts] = useState(0); // Track retry attempts
+  const maxAttempts = 5; // Max retries
+  const retryDelay = 1000; // 1 second delay between retries
 
   useEffect(() => {
-    if (sessionId) {
-      toast.success('Payment successful! Thank you for your purchase.');
-      // Fetch order details from your backend using the sessionId
-      const fetchOrderDetails = async () => {
-        try {
-          // Assuming you have an API route to fetch order by Stripe sessionId
-          // This might be part of your existing /api/orders/[id] route
-          // Or a new route like /api/orders/by-stripe-session/[sessionId]
-          // For simplicity, let's assume /api/orders/[id] can handle searching by stripeSessionId if `id` doesn't match ObjectId
-          const res = await axios.get(`/api/orders/${sessionId}`); // Adjust this endpoint if needed
-          if (res.data.success && res.data.data) {
-            setOrder(res.data.data);
-          } else {
-            toast.error('Could not find order details.');
-          }
-        } catch (error: unknown) { // Changed 'any' to 'unknown'
-          console.error('Failed to fetch order details:', error);
-          if (axios.isAxiosError(error) && error.response?.data?.message) {
-            toast.error(error.response.data.message, { id: 'fetchOrderDetails' });
-          } else if (error instanceof Error) {
-            toast.error(error.message || 'Error loading order details.', { id: 'fetchOrderDetails' });
-          } else {
-            toast.error('Error loading order details.', { id: 'fetchOrderDetails' });
-          }
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchOrderDetails();
-      // Optionally clear the cart from localStorage here, as payment is complete
-      localStorage.removeItem('cart');
-    } else {
+    if (!sessionId) {
       toast.error('Payment success page accessed without a session ID.');
       setLoading(false);
+      return;
     }
-  }, [sessionId]);
+
+    const fetchOrderDetails = async () => {
+      setLoading(true);
+      toast.loading('Confirming your order...', { id: 'orderConfirmation' });
+
+      let currentAttempts = 0;
+      let fetchedOrder: IOrder | null = null;
+
+      while (currentAttempts < maxAttempts && !fetchedOrder) {
+        try {
+          const res = await axios.get(`/api/orders/${sessionId}`);
+          if (res.data.success && res.data.data) {
+            fetchedOrder = res.data.data;
+            toast.success('Order confirmed and details loaded!', { id: 'orderConfirmation' });
+          } else {
+            // Order not found yet, or API returned success: false
+            console.warn(`Attempt ${currentAttempts + 1}: Order not found or failed response.`);
+          }
+        } catch (error: unknown) {
+          console.error(`Attempt ${currentAttempts + 1}: Failed to fetch order details:`, error);
+        }
+
+        if (!fetchedOrder && currentAttempts < maxAttempts - 1) {
+          // If order not found and more attempts remaining, wait before retrying
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
+        currentAttempts++;
+      }
+
+      setOrder(fetchedOrder);
+      setLoading(false);
+
+      if (!fetchedOrder) {
+        toast.error('Could not find your order details after multiple attempts. Please check your order history later.', { id: 'orderConfirmation' });
+      }
+    };
+
+    fetchOrderDetails();
+    // Optionally clear the cart from localStorage here, as payment is complete
+    localStorage.removeItem('cart');
+  }, [sessionId]); // Re-run effect if sessionId changes
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-xl text-gray-700">Loading order details...</p>
+      <div className="flex flex-col justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-4"></div>
+        <p className="text-xl text-gray-700">Confirming your order. Please wait...</p>
       </div>
     );
   }
@@ -80,7 +94,7 @@ function SuccessPageContent() { // Renamed to SuccessPageContent
           </p>
         </div>
       ) : (
-        <p className="text-md text-gray-600 mb-4">Order details could not be loaded.</p>
+        <p className="text-md text-gray-600 mb-4">Order details could not be loaded. Please check your order history page for confirmation.</p>
       )}
       <div className="space-y-4">
         <Link href="/dashboard/orders" className="block w-full py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition duration-300">
@@ -94,11 +108,11 @@ function SuccessPageContent() { // Renamed to SuccessPageContent
   );
 }
 
-// Export the main page component wrapped in Suspense
+// Export the main page component wrapped in Suspense for initial render
 export default function SuccessPage() {
   return (
     <Suspense fallback={
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center min-h-screen">
         <p className="text-xl text-gray-700">Loading success page...</p>
       </div>
     }>
@@ -106,6 +120,3 @@ export default function SuccessPage() {
     </Suspense>
   );
 }
-
-
-
