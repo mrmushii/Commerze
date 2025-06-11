@@ -77,11 +77,11 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ title = 'Featured C
   }
 
   return (
-    <section className="my-8 p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">{title}</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <section className="mx-0 md:mx-10 my-8 p-6 py-16 bg-white rounded-lg shadow-md">
+      <h2 className="text-3xl font-extrabold text-center mb-8 text-gray-800 uppercase">{title}</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-0 md:px-10">
         {products.map((product) => (
-          <div key={product._id.toString()} className="bg-gray-50 rounded-lg shadow-sm overflow-hidden transform transition duration-300 hover:scale-105">
+          <div key={product._id.toString()} className="hover:bg-gray-50 hover:rounded-4xl overflow-hidden transform transition duration-300 hover:scale-105">
             <Link href={`/products/${product._id.toString()}`}>
               <div className="relative w-full h-48">
                 <Image
@@ -89,14 +89,14 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ title = 'Featured C
                   alt={product.name}
                   layout="fill"
                   objectFit="cover"
-                  className="rounded-t-lg"
+                  className="rounded-4xl"
                   onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/400x300/F0F0F0/ADADAD?text=Image+Not+Found`; }}
                 />
               </div>
               <div className="p-4">
                 <h3 className="text-lg font-semibold text-gray-800 truncate">{product.name}</h3>
                 <p className="text-gray-600 text-sm">{product.category} - {product.type}</p>
-                <p className="text-xl font-bold text-blue-600 mt-2">${typeof product.price === 'number' ? product.price.toFixed(2) : product.price}</p> {/* Safely call toFixed */}
+                <p className="text-xl font-bold mt-2">${typeof product.price === 'number' ? product.price.toFixed(2) : product.price}</p> {/* Safely call toFixed */}
               </div>
             </Link>
           </div>
