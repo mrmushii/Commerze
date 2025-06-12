@@ -11,6 +11,8 @@ import mongoose from 'mongoose'; // Import mongoose for type safety
 /**
  * Admin Order Management Page.
  * This is a Server Component that fetches all orders from the database.
+ * The page is designed to be responsive, adapting to different screen sizes
+ * by showing a table on larger screens and a card view on mobile.
  */
 export default async function AdminOrdersPage() {
   const { userId, sessionClaims } = await auth(); // Await auth()
@@ -19,8 +21,7 @@ export default async function AdminOrdersPage() {
   const claims = sessionClaims as CustomSessionClaims;
 
   // Redirect if not signed in or not an admin
-  // Check for userId, then safely access role using optional chaining
-  if (!userId || claims?.public_metadata?.role !== 'admin') { // Use claims.metadata.role
+  if (!userId || claims?.public_metadata?.role !== 'admin') {
     redirect('/sign-in');
   }
 
@@ -28,56 +29,112 @@ export default async function AdminOrdersPage() {
   const orders: IOrder[] = await Order.find({}).sort({ createdAt: -1 }); // Fetch all orders, newest first
 
   return (
-    <div className="container mx-auto p-4 bg-white shadow-md rounded-lg">
-      <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">All Orders</h1>
+    // Main container with responsive padding: p-4 for small screens, p-6 for medium and up
+    <div className="container mx-auto p-4 sm:p-6 bg-white shadow-md rounded-lg">
+      {/* Heading with responsive font size */}
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-6 text-gray-800">All Orders</h1>
 
       {orders.length === 0 ? (
-        <p className="text-center text-gray-600 text-xl mt-8">No orders have been placed yet.</p>
+        <p className="text-center text-gray-600 text-base sm:text-xl mt-8">No orders have been placed yet.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="py-3 px-4 border-b text-left text-sm font-semibold text-gray-700">Order ID</th>
-                <th className="py-3 px-4 border-b text-left text-sm font-semibold text-gray-700">Customer ID</th>
-                <th className="py-3 px-4 border-b text-left text-sm font-semibold text-gray-700">Total</th>
-                <th className="py-3 px-4 border-b text-left text-sm font-semibold text-gray-700">Payment Status</th>
-                <th className="py-3 px-4 border-b text-left text-sm font-semibold text-gray-700">Order Status</th>
-                <th className="py-3 px-4 border-b text-left text-sm font-semibold text-gray-700">Date</th>
-                <th className="py-3 px-4 border-b text-left text-sm font-semibold text-gray-700">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order) => (
-                // IMPORTANT: Ensure no whitespace (newlines/spaces) between <td> tags on the same line
-                <tr key={(order._id as mongoose.Types.ObjectId).toString()} className="hover:bg-gray-50 transition duration-150 ease-in-out">
-                  <td className="py-3 px-4 border-b text-gray-800 font-medium">{(order._id as mongoose.Types.ObjectId).toString().substring(0, 8)}...</td><td className="py-3 px-4 border-b text-gray-600">{order.userId.substring(0, 8)}...</td><td className="py-3 px-4 border-b text-gray-800">${order.totalAmount.toFixed(2)}</td><td className="py-3 px-4 border-b">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                      order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
-                      order.paymentStatus === 'failed' ? 'bg-red-100 text-red-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
-                    </span>
-                  </td><td className="py-3 px-4 border-b">
-                    {/* Client component for updating status */}
-                    <OrderStatusDropdown
-                      orderId={(order._id as mongoose.Types.ObjectId).toString()}
-                      currentStatus={order.orderStatus}
-                    />
-                  </td><td className="py-3 px-4 border-b text-gray-600">
-                    {new Date(order.createdAt).toLocaleDateString()}
-                  </td><td className="py-3 px-4 border-b">
-                    <Link href={`/admin/orders/${(order._id as mongoose.Types.ObjectId).toString()}`} className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition">
-                      Details
-                    </Link>
-                    {/* Add delete button for admin if needed, similar to products */}
-                  </td>
+        <>
+          {/* Desktop and Tablet View (Table) - Hidden on extra small screens */}
+          <div className="hidden sm:block">
+            <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="py-3 px-4 border-b text-left text-sm font-semibold text-gray-700">Order ID</th>
+                  <th className="py-3 px-4 border-b text-left text-sm font-semibold text-gray-700">Customer ID</th>
+                  <th className="py-3 px-4 border-b text-left text-sm font-semibold text-gray-700">Total</th>
+                  <th className="py-3 px-4 border-b text-left text-sm font-semibold text-gray-700">Payment Status</th>
+                  <th className="py-3 px-4 border-b text-left text-sm font-semibold text-gray-700">Order Status</th>
+                  <th className="py-3 px-4 border-b text-left text-sm font-semibold text-gray-700">Date</th>
+                  <th className="py-3 px-4 border-b text-left text-sm font-semibold text-gray-700">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {orders.map((order) => (
+                  <tr key={(order._id as mongoose.Types.ObjectId).toString()} className="hover:bg-gray-50 transition duration-150 ease-in-out">
+                    <td className="py-3 px-4 border-b text-gray-800 font-medium text-sm">{(order._id as mongoose.Types.ObjectId).toString()}</td>
+                    <td className="py-3 px-4 border-b text-gray-600 text-sm">{order.userId}</td>
+                    <td className="py-3 px-4 border-b text-gray-800 text-sm">${order.totalAmount.toFixed(2)}</td>
+                    <td className="py-3 px-4 border-b">
+                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                        order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
+                        order.paymentStatus === 'failed' ? 'bg-red-100 text-red-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 border-b">
+                      <OrderStatusDropdown
+                        orderId={(order._id as mongoose.Types.ObjectId).toString()}
+                        currentStatus={order.orderStatus}
+                      />
+                    </td>
+                    <td className="py-3 px-4 border-b text-gray-600 text-sm">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="py-3 px-4 border-b">
+                      <Link href={`/admin/orders/${(order._id as mongoose.Types.ObjectId).toString()}`} className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition">
+                        Details
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile View (Cards) - Hidden on small screens and up */}
+          <div className="sm:hidden grid grid-cols-1 gap-4">
+            {orders.map((order) => (
+              <div key={(order._id as mongoose.Types.ObjectId).toString()} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-semibold text-gray-700 text-sm">Order ID:</span>
+                  <span className="text-gray-800 text-sm">{(order._id as mongoose.Types.ObjectId).toString()}</span>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-semibold text-gray-700 text-sm">Customer ID:</span>
+                  <span className="text-gray-600 text-sm">{order.userId}</span>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-semibold text-gray-700 text-sm">Total:</span>
+                  <span className="text-gray-800 text-sm">${order.totalAmount.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-semibold text-gray-700 text-sm">Payment Status:</span>
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                    order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
+                    order.paymentStatus === 'failed' ? 'bg-red-100 text-red-800' :
+                    'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-semibold text-gray-700 text-sm">Order Status:</span>
+                  <OrderStatusDropdown
+                    orderId={(order._id as mongoose.Types.ObjectId).toString()}
+                    currentStatus={order.orderStatus}
+                  />
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-semibold text-gray-700 text-sm">Date:</span>
+                  <span className="text-gray-600 text-sm">
+                    {new Date(order.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="mt-4 text-right">
+                  <Link href={`/admin/orders/${(order._id as mongoose.Types.ObjectId).toString()}`} className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition">
+                    Details
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
