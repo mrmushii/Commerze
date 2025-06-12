@@ -14,6 +14,7 @@ html {
 
 /* Light Theme Variables */
 :root {
+  --prime: #F2F0F1;
   --primary-color: #3b82f6;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -24,7 +25,7 @@ html {
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
+  --secondary: #F2F0F1;
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
@@ -184,17 +185,8 @@ body {
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-primary1: #8B5CF6,
-  --color-secondary: #f1f4f1,
   --color-accentBlue: #38BDF8,
-        --color-accentGreen: #84CC16,
-        --color-accentYellow: #F59E0B,
-        --color-accentPink: #FB7185,
-        --color-textDark: #0F172A,
-        --color-textMuted: #6B7280,
-        --color-bgLight: #F9FAFB,
-        --color-card: #F3F4F6,
-        --color-border: #E5E7EB,
-        --color-text: rgba(0, 0, 0, 0.6);
+  --color-prime: #F2F0F1,
 
 
 }

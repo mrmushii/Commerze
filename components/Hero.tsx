@@ -6,7 +6,7 @@ import Image from "next/image";
 
 const Hero = () => {
   return (
-    <div className="min-h-screen md:h-screen w-full overflow-hidden">
+    <div className="min-h-screen md:h-screen w-full overflow-hidden bg-secondary">
       <div className="md:flex justify-between z-0">
         <div className="flex flex-col justify-center mt-10 items-center md:items-start w-full p-0 md:px-20 md:w-1/2 h-9/12">
           <h1 className="text-4xl md:text-5xl font-extrabold">
