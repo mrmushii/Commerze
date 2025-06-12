@@ -5,10 +5,10 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { IProduct } from '@/lib/type'; // Corrected import path
-import SearchComponent from '@/components/SearchComponent'; // Can be used within the sidebar or elsewhere
-import FeaturedProducts from '@/components/FeaturedProducts'; // For Top Sellers
-import NewArrivals from '@/components/NewArrivals'; // For New Arrivals
+import { IProduct } from '@/lib/type';
+import SearchComponent from '@/components/SearchComponent';
+import FeaturedProducts from '@/components/FeaturedProducts';
+import NewArrivals from '@/components/NewArrivals';
 import { Menu } from 'lucide-react';
 
 export default function ProductsPage() {
@@ -19,11 +19,11 @@ export default function ProductsPage() {
   // Filter states
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedType, setSelectedType] = useState('');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]); // [min, max] for slider
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
   const [selectedColor, setSelectedColor] = useState('');
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedGender, setSelectedGender] = useState('');
-  const [searchTerm, setSearchTerm] = useState(''); // Added for in-page search
+  const [searchTerm, setSearchTerm] = useState('');
 
   const categories = ['Men', 'Women', 'Kids'];
   const types = ['Formal', 'Casual', 'Party', 'Sportswear', 'Other'];
@@ -37,11 +37,10 @@ export default function ProductsPage() {
       setError(null);
       try {
         const params = new URLSearchParams();
-        if (searchTerm) params.append('q', searchTerm); // Include search term
+        if (searchTerm) params.append('q', searchTerm);
         if (selectedCategory) params.append('category', selectedCategory);
         if (selectedType) params.append('type', selectedType);
 
-        // Append price range from slider
         params.append('minPrice', priceRange[0].toString());
         params.append('maxPrice', priceRange[1].toString());
 
@@ -50,19 +49,19 @@ export default function ProductsPage() {
         if (selectedGender) params.append('gender', selectedGender);
 
         const queryString = params.toString();
-        console.log("Fetching products with query:", queryString); // Debugging log
+        console.log("Fetching products with query:", queryString);
         const response = await fetch(`/api/products/search?${queryString}`);
         const data = await response.json();
 
-        if (response.ok && data.success) { // Ensure response.ok (200 status)
-          console.log("Fetched products successfully:", data.data.length, "items"); // Debugging log
+        if (response.ok && data.success) {
+          console.log("Fetched products successfully:", data.data.length, "items");
           setProducts(data.data);
         } else {
-          console.error("Failed to fetch products from API:", data.message); // Debugging log
+          console.error("Failed to fetch products from API:", data.message);
           setError(data.message || 'Failed to fetch products.');
         }
       } catch (err: unknown) {
-        console.error('Error fetching products (network/unexpected):', err); // Debugging log
+        console.error('Error fetching products (network/unexpected):', err);
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
         setError(errorMessage);
       } finally {
@@ -72,23 +71,22 @@ export default function ProductsPage() {
 
     const delayDebounceFn = setTimeout(() => {
       fetchProducts();
-    }, 300); // Debounce search/filter changes
+    }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm, selectedCategory, selectedType, priceRange, selectedColor, selectedSize, selectedGender]); // Include all relevant states in dependency array
+  }, [searchTerm, selectedCategory, selectedType, priceRange, selectedColor, selectedSize, selectedGender]);
 
   const handleClearFilters = () => {
     setSearchTerm('');
     setSelectedCategory('');
     setSelectedType('');
-    setPriceRange([0, 500]); // Reset price range
+    setPriceRange([0, 500]);
     setSelectedColor('');
     setSelectedSize('');
     setSelectedGender('');
     toast.success('All filters cleared!');
   };
 
-  // Ensure min <= max for price range slider
   const handleMinPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     setPriceRange([value, Math.max(value, priceRange[1])]);
@@ -239,27 +237,27 @@ export default function ProductsPage() {
     </>
   );
 
-
   return (
     <div className="container mx-auto p-4 flex flex-col md:flex-row gap-6">
-      {/* Filter Sidebar */}
-      <div className="md:hidden flex justify-between items-center p-4 bg-white shadow-sm  top-16 z-30">
+      {/* Filter Sidebar Toggle for Mobile */}
+      <div className="md:hidden flex justify-between items-center p-4 bg-white shadow-sm sticky top-0 z-30"> {/* Adjusted top-16 to top-0 and added sticky */}
         <h2 className="text-xl font-bold text-gray-800">Filters</h2>
         <button
           onClick={() => setIsMobileSidebarOpen(true)}
           className="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <Menu className="w-6 h-6 text-gray-700" />
+          <Menu className="w-8 h-8 text-gray-700 rounded-sm p-1 hover:bg-secondary" />
         </button>
       </div>
 
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:block md:w-1/4 p-6 bg-white rounded-lg shadow-md sticky top-24 h-fit">
+      {/* Added h-[calc(100vh-theme(space.24))] and overflow-y-auto */}
+      <aside className="hidden md:block md:w-1/4 p-6 bg-white rounded-lg shadow-md sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto">
         {renderSidebarContent()}
       </aside>
 
       {/* Sidebar Drawer - Mobile */}
-      <div className={`fixed inset-0 z-40 bg-black bg-opacity-40 md:hidden transition-opacity duration-300 ${isMobileSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+      <div className={`fixed inset-0 z-40 bg-black/25 md:hidden transition-opacity duration-300 ${isMobileSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
         <div className={`absolute left-0 top-0 h-full w-3/4 bg-white p-6 shadow-lg transform transition-transform duration-300 ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           <button
             onClick={() => setIsMobileSidebarOpen(false)}
@@ -267,7 +265,8 @@ export default function ProductsPage() {
           >
             ✕
           </button>
-          <div className="overflow-y-auto h-full pr-2 z-30">
+          {/* Added h-full and overflow-y-auto to the inner div for mobile sidebar content */}
+          <div className="overflow-y-auto h-full pr-2">
             {renderSidebarContent()}
           </div>
         </div>
@@ -300,13 +299,11 @@ export default function ProductsPage() {
                 <Link href={`/products/${product._id.toString()}`}>
                   <div className="relative w-full h-48 bg-gray-200">
                     <Image
-                      // FIX: Use product.imageUrls[0] with optional chaining and fallback
                       src={product.imageUrls?.[0] || `https://placehold.co/400x300/F0F0F0/ADADAD?text=No+Image`}
                       alt={product.name}
                       layout="fill"
-                      objectFit="cover" // Note: consider replacing with style={{ objectFit: 'cover' }} for Next.js 13+
+                      objectFit="cover"
                       className="rounded-t-lg"
-                      // FIX: Corrected typo HTMLHTMLImageElement to HTMLImageElement
                       onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/400x300/F0F0F0/ADADAD?text=Image+Not+Found`; }}
                     />
                   </div>

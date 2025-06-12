@@ -66,20 +66,6 @@ export default function HomePage() {
 
       <Browse/>
 
-      {/* Search Section */}
-      <section className="my-12 p-8 pb-14 bg-white rounded-2xl shadow-lg text-center border border-gray-200">
-        <Suspense fallback={
-          <div className="text-center p-8">
-            <p className="text-gray-600">Loading search options...</p>
-          </div>
-        }>
-          <SearchComponent /> {/* Integrated Search Component */}
-        </Suspense>
-        {/* <p className="text-center text-gray-600 mt-4">
-          Or <Link href="/products" className="text-blue-600 hover:underline">browse all our collections</Link>
-        </p> */}
-      </section>
-
       {/* About Us / Advertisements Section */}
       <Advertise/>
 
