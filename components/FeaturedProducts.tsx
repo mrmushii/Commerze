@@ -81,39 +81,56 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ title = 'Featured C
       <h2 className="text-3xl font-extrabold mb-8 text-gray-800 uppercase">{title}</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-0 md:px-10 my-10">
         {products.map((product) => {
-          const rating = product.averageRating || 0; // Correctly defined within the map loop
+          const rating = product.averageRating || 0;
+          const formattedRating = rating.toFixed(1); // Format to one decimal place
 
           return (
-            <div key={product._id.toString()} className="hover:bg-gray-50 hover:rounded-4xl overflow-hidden transform transition duration-300 hover:scale-105">
+            <div
+              key={product._id.toString()}
+              className="bg-white hover:bg-gray-50 rounded-4xl overflow-hidden transform transition duration-300 hover:scale-105" // Card styling
+            >
               <Link href={`/products/${product._id.toString()}`}>
-                <div className="relative w-full h-52">
+                <div className="relative w-full h-64"> {/* Image container height */}
                   <Image
-                    src={product.imageUrls?.[0] || `https://placehold.co/400x300/F0F0F0/ADADAD?text=No+Image`} // Safely access imageUrls[0]
+                    src={product.imageUrls?.[0] || `https://placehold.co/400x300/F0F0F0/ADADAD?text=No+Image`}
                     alt={product.name}
                     layout="fill"
                     objectFit="cover"
-                    className="rounded-4xl"
+                    className="rounded-t-xl" // Rounded top corners for image
                     onError={(e) => { (e.target as HTMLImageElement).src = `https://placehold.co/400x300/F0F0F0/ADADAD?text=Image+Not+Found`; }}
                   />
                 </div>
-                <div className="p-4 my-4 text-start">
-                  <h3 className="text-lg font-semibold text-gray-800 truncate">{product.name}</h3>
-                  <p className="text-gray-600 text-sm">{product.category} - {product.type}</p>
-                  <div className="flex items-center mt-1 mb-2 "> {/* Added a div to contain stars */}
+                <div className="p-4 text-start"> {/* Adjusted padding */}
+                  <h3 className="text-lg font-semibold text-gray-800 truncate mb-1"> {/* Adjusted margin */}
+                    {product.name}
+                  </h3>
+                  {/* Removed category and type as per NewArrivals */}
+                  <div className="flex items-center mt-1 mb-2"> {/* Star rating container */}
                     {[...Array(5)].map((_, i) => (
-                      <svg key={i} className={`w-5 h-5 ${i < Math.floor(rating) ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                      <svg
+                        key={i}
+                        className={`w-4 h-4 ${ // Smaller stars
+                          i < Math.floor(rating) ? 'text-yellow-400' : 'text-gray-300'
+                        }`}
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.324 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.324-1.118l-2.8-2.034c-.783-.57-.381-1.81.588-1.81h3.462a1 1 0 00.95-.69L9.049 2.927z"></path>
                       </svg>
                     ))}
+                    <span className="ml-1 text-gray-500 text-xs">{formattedRating}/5</span> {/* Rating text */}
                   </div>
-                  <p className="text-xl font-bold mt-2">${typeof product.price === 'number' ? product.price.toFixed(2) : product.price}</p> {/* Safely call toFixed */}
+                  <p className="text-xl font-bold mt-2 text-gray-800"> {/* Price styling */}
+                    ${typeof product.price === 'number' ? product.price.toFixed(2) : product.price}
+                  </p>
+                  {/* Old price and discount removed here */}
                 </div>
               </Link>
             </div>
           );
         })}
       </div>
-      
     </section>
   );
 };
