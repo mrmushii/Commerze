@@ -101,7 +101,9 @@ const Navbar = () => {
         </ul>
 
         {/* Search Bar (Centered and Expands) */}
+        
         <div className="relative flex-grow mx-4">
+          {/* <Search className="absolute left-32 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" /> */}
           <form onSubmit={handleSearchSubmit} className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
             <input

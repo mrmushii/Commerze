@@ -14,7 +14,7 @@ import Advertise from '@/components/Advertise';
 
 export default function HomePage() {
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto m-[-60px]">
       <Hero/>
       <div className="h-20 w-full relative z-40 top-[-80px] bg-black text-white grid grid-cols-3 md:grid-cols-5 justify-items-center items-center">
         <Image src={"/versage.png"} width={120} height={70} alt='logo'/>
@@ -24,7 +24,7 @@ export default function HomePage() {
         <Image src={"/calvin.png"} width={140} height={90} alt='logo'/>
       </div>
       <NewArrivals limit={4}/>
-
+      <hr />
       {/* Featured Collections Section */}
       <FeaturedProducts limit={4} title='TOP SELLING'/> {/* Integrated Featured Products Component */}
 

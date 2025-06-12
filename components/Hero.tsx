@@ -9,10 +9,10 @@ const Hero = () => {
     <div className="min-h-screen md:h-screen w-full overflow-hidden bg-secondary">
       <div className="md:flex justify-between z-0">
         <div className="flex flex-col justify-center mt-10 items-center md:items-start w-full p-0 md:px-20 md:w-1/2 h-9/12">
-          <h1 className="text-4xl md:text-5xl font-extrabold">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-center">
             FIND CLOTHES <br /> THAT MATCHES <br /> YOUR STYLE
           </h1>
-          <p className="py-5 text-slate-400">
+          <p className="py-5 text-slate-400 px-10 md:px-0">
             Browse through our diverse range of meticulously crafted garments,
             designed to bring out your individuality and cater to your sense of
             style.

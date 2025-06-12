@@ -36,7 +36,7 @@ const Browse = () => {
               fill
               className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300 ease-in-out"
             />
-            <div className="absolute top-2 left-2 bg-white bg-opacity-80 px-3 py-1 rounded-md text-sm font-semibold text-gray-800 shadow-md">
+            <div className="absolute top-2 left-2 bg-white bg-opacity-80 px-3 py-1 rounded-md text-md md:text-lg font-bold text-gray-800">
               {style.name}
             </div>
           </button>
