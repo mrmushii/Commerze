@@ -1,4 +1,5 @@
-import React from 'react'
+import React from 'react';
+import { Facebook, Instagram, Twitter } from 'lucide-react'; // Import the icons
 
 // components/Footer.tsx
 
@@ -24,10 +25,16 @@ export default function Footer() {
 
         <div>
           <h4 className="text-md font-semibold mb-2">Follow Us</h4>
-          <div className="flex space-x-4">
-            <a href="#" className="hover:text-black">Facebook</a>
-            <a href="#" className="hover:text-black">Instagram</a>
-            <a href="#" className="hover:text-black">Twitter</a>
+          <div className="flex space-x-4 text-blue-600">
+            <a href="https://www.facebook.com/" target='_blank' className="hover:text-black">
+              <Facebook size={24} /> {/* Facebook Icon */}
+            </a>
+            <a href="https://www.instagram.com/" target='_blank' className="hover:text-black">
+              <Instagram size={24} /> {/* Instagram Icon */}
+            </a>
+            <a href="https://www.twitter.com/" target='_blank' className="hover:text-black">
+              <Twitter size={24} /> {/* Twitter Icon */}
+            </a>
           </div>
         </div>
       </div>

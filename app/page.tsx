@@ -23,6 +23,20 @@ export default function HomePage() {
         <Image src={"/prada.png"} width={120} height={70} alt='logo'/>
         <Image src={"/calvin.png"} width={140} height={90} alt='logo'/>
       </div>
+      {/* Search Section */}
+      <section className="pt-2 bg-white rounded-2xl shadow-lg text-center border border-gray-200">
+        <Suspense fallback={
+          <div className="text-center p-8">
+            <p className="text-gray-600">Loading search options...</p>
+          </div>
+        }>
+          <SearchComponent /> {/* Integrated Search Component */}
+        </Suspense>
+        {/* <p className="text-center text-gray-600 mt-4">
+          Or <Link href="/products" className="text-blue-600 hover:underline">browse all our collections</Link>
+        </p> */}
+      </section>
+
       <NewArrivals limit={4}/>
       <hr />
       {/* Featured Collections Section */}
@@ -32,7 +46,6 @@ export default function HomePage() {
 
       {/* Search Section */}
       <section className="my-12 p-8 pb-14 bg-white rounded-2xl shadow-lg text-center border border-gray-200">
-        <h2 className="text-3xl font-bold text-center mb-6 text-gray-800 bg-white z-20">Find Your Perfect Outfit</h2>
         <Suspense fallback={
           <div className="text-center p-8">
             <p className="text-gray-600">Loading search options...</p>
@@ -40,9 +53,9 @@ export default function HomePage() {
         }>
           <SearchComponent /> {/* Integrated Search Component */}
         </Suspense>
-        <p className="text-center text-gray-600 mt-4">
+        {/* <p className="text-center text-gray-600 mt-4">
           Or <Link href="/products" className="text-blue-600 hover:underline">browse all our collections</Link>
-        </p>
+        </p> */}
       </section>
 
       {/* About Us / Advertisements Section */}
