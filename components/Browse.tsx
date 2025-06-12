@@ -23,7 +23,26 @@ const Browse = () => {
       <h2 className="text-center text-2xl sm:text-3xl font-extrabold text-black mb-6 uppercase">
         Browse By Dress Style
       </h2>
-      <div className="block md:grid grid-cols-2 gap-4 sm:gap-6">
+      <div className="flex flex-col gap-4 md:hidden">
+        {dressStyles.map((style) => (
+          <button
+            key={style.type}
+            onClick={() => handleClick(style.type)}
+            className="relative rounded-xl overflow-hidden group h-40 focus:outline-none"
+          >
+            <Image
+              src={style.image}
+              alt={style.name}
+              fill
+              className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300 ease-in-out"
+            />
+            <div className="absolute top-2 left-2 bg-white bg-opacity-80 px-3 py-1 rounded-md text-sm font-semibold text-gray-800 shadow-md">
+              {style.name}
+            </div>
+          </button>
+        ))}
+      </div>
+      <div className="block md:grid grid-cols-2 gap-4 sm:gap-6 max-md:hidden">
         {dressStyles.map((style) => (
           <button
             key={style.type}

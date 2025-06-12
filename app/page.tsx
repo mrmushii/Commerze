@@ -23,10 +23,10 @@ export default function HomePage() {
         <Image src={"/prada.png"} width={120} height={70} alt='logo'/>
         <Image src={"/calvin.png"} width={140} height={90} alt='logo'/>
       </div>
-      <NewArrivals/>
+      <NewArrivals limit={4}/>
 
       {/* Featured Collections Section */}
-      <FeaturedProducts limit={8} title='TOP SELLING'/> {/* Integrated Featured Products Component */}
+      <FeaturedProducts limit={4} title='TOP SELLING'/> {/* Integrated Featured Products Component */}
 
       <Browse/>
 

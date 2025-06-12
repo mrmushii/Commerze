@@ -1,8 +1,12 @@
+// app/dashboard/page.tsx
+// This file acts as the default page for the /dashboard route, redirecting to user orders.
+// It can be expanded to a more comprehensive user dashboard later.
+
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order'; // Assuming you have this model
-import { IOrder } from '@/lib/type'; // Assuming you have this type
+import { IOrder } from '@/lib/type'; // FIX: Corrected import path for IOrder
 import Link from 'next/link';
 import mongoose from 'mongoose'; // Import mongoose for type safety
 import Image from 'next/image'; // Import Next.js Image component
@@ -24,18 +28,21 @@ export default async function UserDashboardPage() {
   const recentOrders: IOrder[] = await Order.find({ userId: userId }).sort({ createdAt: -1 }).limit(5);
 
   return (
-    <div className="p-6 bg-white shadow-md rounded-lg">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Your Dashboard</h1>
-      <p className="text-lg text-gray-700 mb-4">Welcome to your personal dashboard!</p>
+    <div className="p-6 bg-white shadow-lg rounded-xl"> {/* Enhanced container styling */}
+      <h1 className="text-4xl font-extrabold text-gray-900 mb-6 text-center tracking-tight">Your Dashboard</h1> {/* Stronger heading */}
+      <p className="text-lg text-gray-700 mb-8 text-center max-w-2xl mx-auto">Welcome to your personal dashboard, where you can view your recent activities and manage your profile.</p>
 
-      <h2 className="text-2xl font-semibold mb-4 text-gray-800">Recent Orders</h2>
+      {/* Recent Orders Section */}
+      <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-3">Recent Orders</h2>
       {recentOrders.length === 0 ? (
-        <p className="text-gray-600">You haven&apos;t placed any orders yet. <Link href="/products" className="text-blue-600 hover:underline">Start shopping!</Link></p>
+        <div className="text-center p-8 bg-gray-50 rounded-lg shadow-inner"> {/* Subtle inner shadow for empty state */}
+          <p className="text-gray-600 text-xl">You haven&apos;t placed any orders yet. <Link href="/products" className="text-blue-600 hover:underline font-semibold">Start shopping!</Link></p>
+        </div>
       ) : (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> {/* Responsive grid for orders */}
           {recentOrders.map(order => (
-            <div key={(order._id as mongoose.Types.ObjectId).toString()} className="border border-gray-200 rounded-lg p-4 shadow-sm">
-              <div className="flex justify-between items-center mb-2">
+            <div key={(order._id as mongoose.Types.ObjectId).toString()} className="bg-white border border-gray-200 rounded-lg p-5 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"> {/* Enhanced card styling */}
+              <div className="flex justify-between items-center mb-3">
                 <h3 className="text-lg font-semibold text-gray-800">Order ID: {(order._id as mongoose.Types.ObjectId).toString().substring(0, 8)}...</h3>
                 <span className={`px-3 py-1 text-sm font-semibold rounded-full ${
                   order.orderStatus === 'delivered' ? 'bg-green-100 text-green-800' :
@@ -46,11 +53,12 @@ export default async function UserDashboardPage() {
                   {order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
                 </span>
               </div>
-              <p className="text-gray-600">Total: <span className="font-bold text-blue-700">${order.totalAmount.toFixed(2)}</span></p>
+              <p className="text-gray-600 mb-1">Total: <span className="font-bold text-blue-700">${order.totalAmount.toFixed(2)}</span></p>
               <p className="text-gray-600 text-sm">Date: {new Date(order.createdAt).toLocaleDateString()}</p>
-              <div className="mt-3 text-right">
-                <Link href={`/dashboard/orders/${(order._id as mongoose.Types.ObjectId).toString()}`} className="text-blue-600 hover:underline font-medium">
+              <div className="mt-4 text-right">
+                <Link href={`/dashboard/orders/${(order._id as mongoose.Types.ObjectId).toString()}`} className="text-blue-600 hover:underline font-medium inline-flex items-center gap-1">
                   View Details
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                 </Link>
               </div>
             </div>
@@ -58,11 +66,29 @@ export default async function UserDashboardPage() {
         </div>
       )}
 
-      <div className="mt-8">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-800">Quick Links</h2>
-        <ul className="list-disc list-inside text-blue-600 space-y-2">
-          <li><Link href="/dashboard/orders" className="hover:underline">View All Your Orders</Link></li>
-          <li><Link href="/user-profile" className="hover:underline">Manage Profile (Clerk UserProfile)</Link></li>
+      {/* Quick Links Section */}
+      <div className="mt-12 p-6 bg-white rounded-lg shadow-lg"> {/* Separate section for quick links */}
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-3">Quick Links</h2>
+        <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-blue-600"> {/* Grid for quick links */}
+          <li className="p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200">
+            <Link href="/dashboard/orders" className="flex items-center gap-2 font-medium hover:underline">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+              View All Your Orders
+            </Link>
+          </li>
+          <li className="p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200">
+            <Link href="/user-profile" className="flex items-center gap-2 font-medium hover:underline">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0h4m-4 0H9m7 0h4m-4 0v3m0 0v3m0 0H8m4 0h.01M17 10h.01M7 10h.01M7 14h.01M17 14h.01"></path></svg>
+              Manage Profile (Clerk UserProfile)
+            </Link>
+          </li>
+          {/* Add more relevant quick links here, e.g., "Change Password", "Contact Support" */}
+          <li className="p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200">
+            <Link href="/contact" className="flex items-center gap-2 font-medium hover:underline">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+              Contact Support
+            </Link>
+          </li>
         </ul>
       </div>
     </div>

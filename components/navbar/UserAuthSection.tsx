@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { CustomSessionClaims } from '@/lib/type'; // Ensure CustomSessionClaims is correctly imported
 import { useUser, useAuth } from '@clerk/nextjs'; // Import useUser and useAuth for client-side role check
 import { User2 } from 'lucide-react'; // Import a user icon for SignedOut state
+import NavMenuLink from './NavMenuLink';
 
 
 /**
@@ -23,11 +24,19 @@ const UserAuthSection: React.FC = () => {
   return (
     <>
       <SignedIn>
-        {isAdminClient && (
+        {isAdminClient ? (
           // Admin text as a visual badge, no functionality
+         <>
+         <NavMenuLink href="/admin/dashboard" label="Dashboard" />
+
           <span className="p-1 px-2 text-xs font-bold text-gray-800 bg-red-100 rounded-full mr-2">
-            Admin
+          Admin
           </span>
+          
+         
+         </>
+        ):(
+          <NavMenuLink href="/dashboard" label="Dashboard" />
         )}
         <UserButton afterSignOutUrl="/" /> {/* Clerk's UserButton */}
       </SignedIn>

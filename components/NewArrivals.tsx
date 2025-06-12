@@ -79,12 +79,12 @@ const NewArrivals: React.FC<NewArrivalsProps> = ({
   }
 
   return (
- <section className="mx-0 md:mx-10 my-8 p-6 py-16 bg-white rounded-lg shadow-md text-center">
+    <section className="mx-0 md:mx-10 my-8 p-6 py-16 bg-white rounded-lg shadow-md text-center">
   <h2 className="text-3xl font-extrabold text-center mb-8 text-gray-800 uppercase">
     {title}
   </h2>
   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-0 md:px-10">
-    {products.slice(0, 4).map((product) => {
+    {products.map((product) => {
       const rating = product.averageRating || 0;
 
       return (

@@ -21,12 +21,10 @@ export default function RootLayout({
       <html lang="en">
         <body className="min-h-screen flex flex-col">
           {/* Navbar at the top */}
-          <Navbar />
-
-          {/* Main content area */}
-          <main className="flex-grow container mx-auto p-4 mt-5">
+          <Navbar /> {/* Include the Navbar here */}
+          {/* FIX: Add padding-top to main content to account for fixed navbar */}
+          <main className="container mx-auto p-4 pt-[60px]"> {/* Adjusted pt to roughly match py-4 (16px) + some navbar height if it's 64px tall */}
             {children}
-            
           </main>
 
           {/* Toast notifications */}
