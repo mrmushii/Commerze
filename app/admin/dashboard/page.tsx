@@ -84,7 +84,7 @@ export default async function AdminDashboardPage() {
     console.log('--- AdminDashboardPage (Server): Render End ---');
 
     return (
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-4 pt-2">
         <h1 className="text-4xl font-bold mb-8 text-gray-800 text-center">Admin Dashboard</h1>
 
         {/* Key Metrics Cards */}

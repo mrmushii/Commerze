@@ -1,17 +1,50 @@
-import Image from 'next/image'
-import React from 'react'
+'use client';
+
+import Image from 'next/image';
+import React from 'react';
+import { useRouter } from 'next/navigation';
 
 const Browse = () => {
+  const router = useRouter();
+  
+  const dressStyles = [
+    { name: 'Casual', image: '/cas.png', type: 'Casual',className:"col-span-full md:col-start-1 md:col-span-2 md:row-span-3" },
+    { name: 'Formal', image: '/formal.png', type: 'Formal',className:"col-span-3 row-span-3 col-start-3" },
+    { name: 'Party', image: '/party.png', type: 'Party',className:"col-span-3 row-span-3 col-start-1 row-start-4" },
+    { name: 'Gym', image: '/sports.png', type: 'Gym',className: "col-span-2 row-span-3 col-start-4 row-start-4"},
+  ];
+
+  const handleClick = (type: string) => {
+    router.push(`/products?type=${encodeURIComponent(type)}`);
+  };
+
   return (
-    <section className="mx-0 md:mx-10 my-8 p-6 py-16 bg-white rounded-lg shadow-md">
-      <h2 className="text-3xl font-extrabold text-center mb-8 text-gray-800 uppercase">BROWSE BY dress STYLE</h2>
-      <div className='grid grid-cols-2'>
-        <Image src={"/cas.png"} height={50} width={50} alt='casual' className='w-1/3'/>
-        <Image src={"/cas.png"} height={50} width={50} alt='casual' className='w-2/5'/>
-        <Image src={"/cas.png"} height={50} width={50} alt='casual' className='w-1/3'/>
+    <section className="bg-gray-100 rounded-2xl p-6 sm:p-10 max-w-5xl mx-auto mt-10">
+      <h2 className="text-center text-2xl sm:text-3xl font-extrabold text-black mb-6 uppercase">
+        Browse By Dress Style
+      </h2>
+      <div className="block md:grid grid-cols-2 gap-4 sm:gap-6">
+        {dressStyles.map((style) => (
+          <button
+            key={style.type}
+            onClick={() => handleClick(style.type)}
+            className={`relative rounded-xl overflow-hidden group focus:outline-none ${style.className}`}
+          >
+            <Image
+              src={style.image}
+              alt={style.name}
+              width={500}
+              height={300}
+              className="object-cover w-full h-36 sm:h-48 group-hover:scale-105 transition-transform duration-300 ease-in-out"
+            />
+            <div className="absolute top-2 left-2 sm:top-4 sm:left-4  bg-opacity-80 px-3 py-1 rounded-md text-sm sm:text-base md:text-lg font-semibold text-gray-800">
+              {style.name}
+            </div>
+          </button>
+        ))}
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default Browse
+export default Browse;

@@ -9,6 +9,7 @@ import Hero from '@/components/Hero';
 import { Suspense } from 'react';
 import NewArrivals from '@/components/NewArrivals';
 import Browse from '@/components/Browse';
+import CustomerTestimonials from '@/components/CustomerTestimonials';
 
 export default function HomePage() {
   return (
@@ -66,7 +67,7 @@ export default function HomePage() {
       </section>
 
       {/* Newsletter Subscription Section */}
-    
+        <CustomerTestimonials/>
         <NewsletterSubscription /> {/* Integrated Newsletter Component */}
     </div>
   );

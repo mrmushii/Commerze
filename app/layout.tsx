@@ -24,13 +24,13 @@ export default function RootLayout({
           <Navbar />
 
           {/* Main content area */}
-          <main className="flex-grow container mx-auto p-4 mt-16">
+          <main className="flex-grow container mx-auto p-4 mt-5">
             {children}
             
           </main>
 
           {/* Toast notifications */}
-          <Toaster position="top-right" />
+          <Toaster position="bottom-right" />
 
           {/* Footer at the bottom */}
           <Footer/>

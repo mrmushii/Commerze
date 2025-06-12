@@ -32,7 +32,7 @@ const NewsletterSubscription: React.FC = () => {
   };
 
   return (
-    <section className="mx-0 md:mx-10 my-8 p-6 py-12 rounded-lg shadow-md flex justify-around items-center bg-black text-white">
+    <section className="mx-0 md:mx-10 my-8 p-6 py-12 rounded-lg shadow-md flex flex-col gap-10 md:gap-0 md:flex-row justify-around items-center bg-black text-white">
       <h2 className="w-1/2 text-2xl md:text-4xl font-bold text-center">STAY UPTO DATE ABOUT <br /> OUR LATEST OFFERS</h2>
       <form onSubmit={handleSubmit} className="w-1/3 flex flex-col justify-center items-center gap-4 max-w-xl mx-auto">
         <input
