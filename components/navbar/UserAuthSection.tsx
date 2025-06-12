@@ -1,12 +1,13 @@
-"use client";
+'use client';
 
-import React from "react";
-import { UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
-import Link from "next/link";
-import { CustomSessionClaims } from "@/lib/type"; // Ensure CustomSessionClaims is correctly imported
-import { useUser, useAuth } from "@clerk/nextjs"; // Import useUser and useAuth for client-side role check
-import { User2 } from "lucide-react"; // Import a user icon for SignedOut state
-import NavMenuLink from "./NavMenuLink";
+import React from 'react';
+import { UserButton, SignedIn, SignedOut } from '@clerk/nextjs';
+import Link from 'next/link';
+import { CustomSessionClaims } from '@/lib/type'; // Ensure CustomSessionClaims is correctly imported
+import { useUser, useAuth } from '@clerk/nextjs'; // Import useUser and useAuth for client-side role check
+import { User2 } from 'lucide-react'; // Import a user icon for SignedOut state
+import NavMenuLink from './NavMenuLink';
+
 
 /**
  * A client-side component to handle user authentication status and display.
@@ -18,9 +19,7 @@ const UserAuthSection: React.FC = () => {
   const { user, isLoaded } = useUser();
 
   // Determine if the client-side user has the admin role
-  const isAdminClient =
-    isSignedIn &&
-    (user?.publicMetadata as CustomSessionClaims["metadata"])?.role === "admin";
+  const isAdminClient = isSignedIn && (user?.publicMetadata as CustomSessionClaims['metadata'])?.role === 'admin';
 
   return (
     <>
@@ -51,11 +50,7 @@ const UserAuthSection: React.FC = () => {
       <SignedOut>
         <div className="flex items-center space-x-2">
           {/* Sign In Link - styled as an icon to match image aesthetic */}
-          <Link
-            href="/sign-in"
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
-            title="Sign In"
-          >
+          <Link href="/sign-in" className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200" title="Sign In">
             <User2 className="w-6 h-6 text-gray-800" />
           </Link>
           {/* Sign Up Link - if you want a separate icon/link for sign up */}
