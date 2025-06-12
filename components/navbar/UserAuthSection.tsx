@@ -7,6 +7,7 @@ import { CustomSessionClaims } from '@/lib/type'; // Ensure CustomSessionClaims 
 import { useUser, useAuth } from '@clerk/nextjs'; // Import useUser and useAuth for client-side role check
 import { User2 } from 'lucide-react'; // Import a user icon for SignedOut state
 import NavMenuLink from './NavMenuLink';
+import CartIconWithCount from './CartIconWithCount';
 
 
 /**
@@ -27,6 +28,7 @@ const UserAuthSection: React.FC = () => {
         {isAdminClient ? (
           // Admin text as a visual badge, no functionality
           <div className="flex gap-4 justify-center items-center">
+            <CartIconWithCount/>
             <ul>
               <NavMenuLink href="/admin/dashboard" label="Dashboard" />
             </ul>
@@ -38,6 +40,7 @@ const UserAuthSection: React.FC = () => {
           </div>
         ) : (
           <div className="flex gap-4 justify-center items-center">
+            <CartIconWithCount/>
           <ul>
             <NavMenuLink href="/dashboard" label="Dashboard" />
           </ul>
