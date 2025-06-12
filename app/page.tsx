@@ -12,7 +12,7 @@ import Browse from '@/components/Browse';
 
 export default function HomePage() {
   return (
-    <div className="container mx-auto p-4 bg-secondary z-30 absolute">
+    <div className="container mx-auto p-4 bg-secondary">
       <Hero/>
       <div className="h-20 w-full relative z-40 top-[-80px] bg-black text-white grid grid-cols-3 md:grid-cols-5 justify-items-center items-center">
         <Image src={"/versage.png"} width={120} height={70} alt='logo'/>
