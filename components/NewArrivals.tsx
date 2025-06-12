@@ -79,7 +79,7 @@ const NewArrivals: React.FC<NewArrivalsProps> = ({
   }
 
   return (
-    <section className="mx-0 md:mx-10 my-8 p-6 py-16 bg-white rounded-lg shadow-md">
+    <section className="my-16 p-6 py-16 bg-gray-50 rounded-lg shadow-xl text-center">
       <h2 className="text-3xl font-extrabold text-center mb-8 text-gray-800 uppercase">
         {title}
       </h2>
