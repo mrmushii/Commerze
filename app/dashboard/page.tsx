@@ -6,7 +6,7 @@ import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order'; // Assuming you have this model
-import { IOrder } from '@/types'; // Assuming you have this type
+import { IOrder } from '@/lib/type'; // Assuming you have this type
 import Link from 'next/link';
 import mongoose from 'mongoose'; // Import mongoose for type safety
 import Image from 'next/image'; // Import Next.js Image component
