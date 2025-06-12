@@ -77,7 +77,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ title = 'Featured C
   }
 
   return (
-    <section className="mx-0 md:mx-10 my-8 p-6 py-16 bg-white rounded-lg text-center">
+    <section className="mx-0 md:mx-10 mt-8 p-6 py-16 bg-white rounded-lg text-center">
       <h2 className="text-3xl font-extrabold mb-8 text-gray-800 uppercase">{title}</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-0 md:px-10 my-10">
         {products.map((product) => {
@@ -113,12 +113,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ title = 'Featured C
           );
         })}
       </div>
-      <Link
-            href="/products"
-            className="inline-block px-8 py-4 bg-white text-blue-600 font-bold rounded-full shadow-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 animate-fade-in-up delay-300"
-          >
-            View All
-      </Link>
+      
     </section>
   );
 };

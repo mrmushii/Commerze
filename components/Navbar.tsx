@@ -94,7 +94,10 @@ const Navbar = () => {
   };
 
   return (
+
     <nav className="responsive-navbar relative w-full bg-white border-b border-gray-200 py-4 px-4 md:px-10 shadow-sm z-50">
+
+   
       <div className="container mx-auto flex items-center justify-between gap-4">
         {/* SHOP.CO Logo */}
         <div className="flex-shrink-0 text-3xl font-extrabold text-black">
@@ -196,7 +199,7 @@ const Navbar = () => {
         </div>
 
         {/* Right Section: Cart and User Auth (Visible on all screen sizes) */}
-        <div className="flex items-center space-x-4 flex-shrink-0">
+        <div className="flex items-center justify-center space-x-4 flex-shrink-0">
           <CartIconWithCount />
           <div className="hidden md:block"> {/* Hide on small for mobile menu */}
             <UserAuthSection />

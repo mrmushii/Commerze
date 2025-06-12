@@ -37,10 +37,32 @@ export default function HomePage() {
         </p> */}
       </section>
 
-      <NewArrivals limit={4}/>
+     
+      <div className='flex flex-col justify-center '>
+        <NewArrivals limit={4}/>
+        <div className='flex justify-center items-center'>
+          <Link
+    href="/products/newarrival"
+    className="inline-block px-8 py-4 mb-9 bg-white text-blue-600 font-bold rounded-full shadow-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 animate-fade-in-up delay-300"
+  >
+    View All
+  </Link>
+        </div>
+      </div>
       <hr />
       {/* Featured Collections Section */}
-      <FeaturedProducts limit={4} title='TOP SELLING'/> {/* Integrated Featured Products Component */}
+      <div className='flex flex-col justify-center '>
+        <FeaturedProducts limit={4} title='TOP SELLING'/>
+        <div className='flex justify-center items-center'>
+          <Link
+    href="/products/newarrival"
+    className="inline-block px-8 py-4 mb-9 bg-white text-blue-600 font-bold rounded-full shadow-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 animate-fade-in-up delay-300"
+  >
+    View All
+  </Link>
+        </div>
+      </div>
+       {/* Integrated Featured Products Component */}
 
       <Browse/>
 

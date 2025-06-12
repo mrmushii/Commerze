@@ -24,20 +24,29 @@ const UserAuthSection: React.FC = () => {
 
   return (
     <>
-      <SignedIn>
+      <SignedIn >
         {isAdminClient ? (
           // Admin text as a visual badge, no functionality
-          <>
-            <NavMenuLink href="/admin/dashboard" label="Dashboard" />
+          <div className="flex gap-4 justify-center items-center">
+            <ul>
+              <NavMenuLink href="/admin/dashboard" label="Dashboard" />
+            </ul>
 
             <span className="p-1 px-2 text-xs font-bold text-gray-800 bg-red-100 rounded-full mr-2">
               Admin
             </span>
-          </>
+            <UserButton afterSignOutUrl="/" />
+          </div>
         ) : (
-          <NavMenuLink href="/dashboard" label="Dashboard" />
+          <div className="flex gap-4 justify-center items-center">
+          <ul>
+            <NavMenuLink href="/dashboard" label="Dashboard" />
+          </ul>
+          <UserButton afterSignOutUrl="/" />
+          </div>
+          
         )}
-        <UserButton afterSignOutUrl="/" /> {/* Clerk's UserButton */}
+         {/* Clerk's UserButton */}
       </SignedIn>
       <SignedOut>
         <div className="flex items-center space-x-2">

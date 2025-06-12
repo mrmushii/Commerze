@@ -9,6 +9,7 @@ import { IProduct } from '@/lib/type'; // Corrected import path
 import SearchComponent from '@/components/SearchComponent'; // Can be used within the sidebar or elsewhere
 import FeaturedProducts from '@/components/FeaturedProducts'; // For Top Sellers
 import NewArrivals from '@/components/NewArrivals'; // For New Arrivals
+import { Menu } from 'lucide-react';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<IProduct[]>([]);
@@ -98,147 +99,179 @@ export default function ProductsPage() {
     setPriceRange([Math.min(value, priceRange[0]), value]);
   };
 
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  const renderSidebarContent = () => (
+    <>
+      <h2 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-4">Filters</h2>
+
+      {/* Search */}
+      <div className="mb-6">
+        <label htmlFor="sidebarSearch" className="block text-sm font-medium text-gray-700 mb-2">Search Products</label>
+        <input
+          type="text"
+          id="sidebarSearch"
+          placeholder="Search by name..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      {/* Main Category */}
+      <div className="mb-6 border-b pb-6">
+        <h3 className="text-xl font-semibold mb-3 text-gray-800">Main Category</h3>
+        <div className="flex flex-col gap-2">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(selectedCategory === cat ? '' : cat)}
+              className={`w-full text-left px-4 py-2 rounded-md transition duration-200 ${
+                selectedCategory === cat ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-gray-50 text-gray-700'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Clothing Type */}
+      <div className="mb-6 border-b pb-6">
+        <h3 className="text-xl font-semibold mb-3 text-gray-800">Clothing Type</h3>
+        <select value={selectedType} onChange={(e) => setSelectedType(e.target.value)}
+          className="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+          <option value="">All Types</option>
+          {types.map(type => <option key={type} value={type}>{type}</option>)}
+        </select>
+      </div>
+
+      {/* Gender */}
+      <div className="mb-6 border-b pb-6">
+        <h3 className="text-xl font-semibold mb-3 text-gray-800">Gender</h3>
+        <select value={selectedGender} onChange={(e) => setSelectedGender(e.target.value)}
+          className="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+          <option value="">All Genders</option>
+          {genders.map(gender => <option key={gender} value={gender}>{gender}</option>)}
+        </select>
+      </div>
+
+      {/* Price Range */}
+      <div className="mb-6 border-b pb-6">
+        <h3 className="text-xl font-semibold mb-3 text-gray-800">Price</h3>
+        <div className="mb-4 text-center font-medium text-gray-700">
+          ${priceRange[0]} - ${priceRange[1]}
+        </div>
+        <div className="relative h-2 bg-gray-200 rounded-full mb-4">
+          <div
+            className="absolute h-full bg-blue-600 rounded-full"
+            style={{ left: `${(priceRange[0] / 500) * 100}%`, width: `${((priceRange[1] - priceRange[0]) / 500) * 100}%` }}
+          ></div>
+          <input
+            type="range"
+            min="0"
+            max="500"
+            value={priceRange[0]}
+            onChange={handleMinPriceChange}
+            className="absolute w-full h-full appearance-none bg-transparent"
+            style={{ top: 0, left: 0, zIndex: 2 }}
+          />
+          <input
+            type="range"
+            min="0"
+            max="500"
+            value={priceRange[1]}
+            onChange={handleMaxPriceChange}
+            className="absolute w-full h-full appearance-none bg-transparent"
+            style={{ top: 0, left: 0, zIndex: 2 }}
+          />
+        </div>
+        <div className="flex justify-between text-sm text-gray-500 mt-2">
+          <span>$0</span>
+          <span>$500+</span>
+        </div>
+      </div>
+
+      {/* Colors */}
+      <div className="mb-6 border-b pb-6">
+        <h3 className="text-xl font-semibold mb-3 text-gray-800">Colors</h3>
+        <div className="flex flex-wrap gap-2">
+          {colors.map(color => (
+            <button
+              key={color}
+              onClick={() => setSelectedColor(selectedColor === color.toLowerCase() ? '' : color.toLowerCase())}
+              style={{ backgroundColor: color.toLowerCase() }}
+              className={`w-8 h-8 rounded-full border-2 ${
+                selectedColor === color.toLowerCase() ? 'border-blue-500 ring-2 ring-blue-500' : 'border-gray-300'
+              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200`}
+              title={color}
+            />
+          ))}
+          <button
+            onClick={() => setSelectedColor('')}
+            className={`w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-500 text-xs ${
+              selectedColor === '' ? 'border-blue-500 ring-2 ring-blue-500' : ''
+            }`}
+            title="Clear Color"
+          >
+            All
+          </button>
+        </div>
+      </div>
+
+      {/* Size */}
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold mb-3 text-gray-800">Size</h3>
+        <select value={selectedSize} onChange={(e) => setSelectedSize(e.target.value)}
+          className="block w-full p-2 border border-gray-300 rounded-md shadow-sm">
+          <option value="">Any Size</option>
+          {sizes.map(size => <option key={size} value={size}>{size}</option>)}
+        </select>
+      </div>
+
+      {/* Clear Filters */}
+      <button
+        onClick={handleClearFilters}
+        className="w-full px-6 py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition duration-300 shadow-md"
+      >
+        Clear All Filters
+      </button>
+    </>
+  );
+
+
   return (
     <div className="container mx-auto p-4 flex flex-col md:flex-row gap-6">
       {/* Filter Sidebar */}
-      <aside className="md:w-1/4 p-6 bg-white rounded-lg shadow-md sticky top-24 h-fit"> {/* sticky top-24 to clear fixed navbar */}
-        <h2 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-4">Filters</h2>
-
-        {/* In-sidebar Search Input */}
-        <div className="mb-6">
-          <label htmlFor="sidebarSearch" className="block text-sm font-medium text-gray-700 mb-2">Search Products</label>
-          <input
-            type="text"
-            id="sidebarSearch"
-            placeholder="Search by name..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-
-        {/* Main Categories */}
-        <div className="mb-6 border-b pb-6">
-          <h3 className="text-xl font-semibold mb-3 text-gray-800">Main Category</h3>
-          <div className="flex flex-col gap-2">
-            {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(selectedCategory === cat ? '' : cat)}
-                className={`w-full text-left px-4 py-2 rounded-md transition duration-200 ${
-                  selectedCategory === cat ? 'bg-blue-100 text-blue-700 font-medium' : 'hover:bg-gray-50 text-gray-700'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Clothing Type Filter */}
-        <div className="mb-6 border-b pb-6">
-          <h3 className="text-xl font-semibold mb-3 text-gray-800">Clothing Type</h3>
-          <select id="typeFilter" value={selectedType} onChange={(e) => setSelectedType(e.target.value)}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
-            <option value="">All Types</option>
-            {types.map(type => <option key={type} value={type}>{type}</option>)}
-          </select>
-        </div>
-
-        {/* Gender Filter */}
-        <div className="mb-6 border-b pb-6">
-          <h3 className="text-xl font-semibold mb-3 text-gray-800">Gender</h3>
-          <select id="genderFilter" value={selectedGender} onChange={(e) => setSelectedGender(e.target.value)}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
-            <option value="">All Genders</option>
-            {genders.map(gender => <option key={gender} value={gender}>{gender}</option>)}
-          </select>
-        </div>
-
-        {/* Price Range Filter (Slider) */}
-        <div className="mb-6 border-b pb-6">
-          <h3 className="text-xl font-semibold mb-3 text-gray-800">Price</h3>
-          <div className="mb-4 text-center font-medium text-gray-700">
-            ${priceRange[0]} - ${priceRange[1]}
-          </div>
-          {/* Custom range input with two thumbs */}
-          <div className="relative h-2 bg-gray-200 rounded-full mb-4">
-            <div
-              className="absolute h-full bg-blue-600 rounded-full"
-              style={{ left: `${(priceRange[0] / 500) * 100}%`, width: `${((priceRange[1] - priceRange[0]) / 500) * 100}%` }}
-            ></div>
-            {/* Min Price Slider */}
-            <input
-              type="range"
-              min="0"
-              max="500"
-              value={priceRange[0]}
-              onChange={handleMinPriceChange}
-              className="absolute w-full h-full appearance-none bg-transparent price-range-slider" /* Added price-range-slider class */
-              style={{ top: 0, left: 0, zIndex: 2 }}
-            />
-            {/* Max Price Slider */}
-            <input
-              type="range"
-              min="0"
-              max="500"
-              value={priceRange[1]}
-              onChange={handleMaxPriceChange}
-              className="absolute w-full h-full appearance-none bg-transparent price-range-slider" /* Added price-range-slider class */
-              style={{ top: 0, left: 0, zIndex: 2 }}
-            />
-          </div>
-          <div className="flex justify-between text-sm text-gray-500 mt-2">
-            <span>$0</span>
-            <span>$500+</span>
-          </div>
-        </div>
-
-        {/* Color Filter (Palette) */}
-        <div className="mb-6 border-b pb-6">
-          <h3 className="text-xl font-semibold mb-3 text-gray-800">Colors</h3>
-          <div className="flex flex-wrap gap-2">
-            {colors.map(color => (
-              <button
-                key={color}
-                onClick={() => setSelectedColor(selectedColor === color.toLowerCase() ? '' : color.toLowerCase())}
-                style={{ backgroundColor: color.toLowerCase() }}
-                className={`w-8 h-8 rounded-full border-2 ${
-                  selectedColor === color.toLowerCase() ? 'border-blue-500 ring-2 ring-blue-500' : 'border-gray-300'
-                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200`}
-                title={color}
-              ></button>
-            ))}
-            <button
-              onClick={() => setSelectedColor('')}
-              className={`w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-gray-500 text-xs ${
-                selectedColor === '' ? 'border-blue-500 ring-2 ring-blue-500' : ''
-              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200`}
-              title="Clear Color"
-            >
-              All
-            </button>
-          </div>
-        </div>
-
-        {/* Size Filter */}
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-3 text-gray-800">Size</h3>
-          <select id="sizeFilter" value={selectedSize} onChange={(e) => setSelectedSize(e.target.value)}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm">
-            <option value="">Any Size</option>
-            {sizes.map(size => <option key={size} value={size}>{size}</option>)}
-          </select>
-        </div>
-
-        {/* Clear Filters Button */}
+      <div className="md:hidden flex justify-between items-center p-4 bg-white shadow-sm  top-16 z-30">
+        <h2 className="text-xl font-bold text-gray-800">Filters</h2>
         <button
-          onClick={handleClearFilters}
-          className="w-full px-6 py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition duration-300 shadow-md"
+          onClick={() => setIsMobileSidebarOpen(true)}
+          className="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          Clear All Filters
+          <Menu className="w-6 h-6 text-gray-700" />
         </button>
+      </div>
+
+      {/* Sidebar - Desktop */}
+      <aside className="hidden md:block md:w-1/4 p-6 bg-white rounded-lg shadow-md sticky top-24 h-fit">
+        {renderSidebarContent()}
       </aside>
+
+      {/* Sidebar Drawer - Mobile */}
+      <div className={`fixed inset-0 z-40 bg-black bg-opacity-40 md:hidden transition-opacity duration-300 ${isMobileSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+        <div className={`absolute left-0 top-0 h-full w-3/4 bg-white p-6 shadow-lg transform transition-transform duration-300 ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <button
+            onClick={() => setIsMobileSidebarOpen(false)}
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+          >
+            ✕
+          </button>
+          <div className="overflow-y-auto h-full pr-2 z-30">
+            {renderSidebarContent()}
+          </div>
+        </div>
+      </div>
 
       {/* Main Content Area - Product Grid */}
       <main className="md:w-3/4 ">

@@ -220,9 +220,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
     try {
       let response;
       if (initialData) {
+        router.refresh()
         response = await axios.put(`/api/products/${(initialData._id as mongoose.Types.ObjectId).toString()}`, data);
+        
         toast.success('Product updated successfully!');
       } else {
+        router.refresh()
         response = await axios.post('/api/products', data);
         toast.success('Product created successfully!');
       }

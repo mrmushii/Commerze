@@ -6,10 +6,11 @@ import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order'; // Assuming you have this model
-import { IOrder } from '@/lib/type'; // FIX: Corrected import path for IOrder
+import { IOrder } from '@/types'; // Assuming you have this type
 import Link from 'next/link';
 import mongoose from 'mongoose'; // Import mongoose for type safety
 import Image from 'next/image'; // Import Next.js Image component
+import { User } from 'lucide-react'; // Import User icon for profile link
 
 /**
  * User Dashboard Page.
@@ -77,8 +78,9 @@ export default async function UserDashboardPage() {
             </Link>
           </li>
           <li className="p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200">
+            {/* FIX: Styled Clerk UserProfile link to match Quick Links design */}
             <Link href="/user-profile" className="flex items-center gap-2 font-medium hover:underline">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0h4m-4 0H9m7 0h4m-4 0v3m0 0v3m0 0H8m4 0h.01M17 10h.01M7 10h.01M7 14h.01M17 14h.01"></path></svg>
+              <User className="w-5 h-5" /> {/* Lucide User icon */}
               Manage Profile (Clerk UserProfile)
             </Link>
           </li>
