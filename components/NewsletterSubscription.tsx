@@ -32,32 +32,29 @@ const NewsletterSubscription: React.FC = () => {
   };
 
   return (
-    <div className="text-center">
-      <h2 className="text-3xl font-bold mb-4 text-gray-800">Stay Updated!</h2>
-      <p className="text-lg text-gray-700 mb-6">
-        Subscribe to our newsletter for exclusive offers, new arrivals, and fashion tips.
-      </p>
-      <form onSubmit={handleSubmit} className="flex flex-col md:flex-row justify-center items-center gap-4 max-w-xl mx-auto">
+    <section className="mx-0 md:mx-10 my-8 p-6 py-12 rounded-lg shadow-md flex justify-around items-center bg-black text-white">
+      <h2 className="w-1/2 text-2xl md:text-4xl font-bold text-center">STAY UPTO DATE ABOUT <br /> OUR LATEST OFFERS</h2>
+      <form onSubmit={handleSubmit} className="w-1/3 flex flex-col justify-center items-center gap-4 max-w-xl mx-auto">
         <input
           type="email"
           placeholder="Enter your email address"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+          className="w-full flex-grow bg-gray-100 text-gray-600 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
           disabled={loading}
         />
         <button
           type="submit"
-          className={`px-6 py-3 rounded-lg font-semibold text-white transition duration-300 shadow-md ${
-            loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
+          className={`w-full px-6 py-3 rounded-lg font-semibold text-black transition duration-300 shadow-md ${
+            loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-gray-100 hover:bg-gray-200 active:bg-blue-800 hover:scale-110'
           }`}
           disabled={loading}
         >
-          {loading ? 'Subscribing...' : 'Subscribe'}
+          {loading ? 'Subscribing...' : 'Subscribe to Newsletter'}
         </button>
       </form>
-    </div>
+    </section>
   );
 };
 

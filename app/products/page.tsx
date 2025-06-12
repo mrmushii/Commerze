@@ -241,7 +241,7 @@ export default function ProductsPage() {
       </aside>
 
       {/* Main Content Area - Product Grid */}
-      <main className="md:w-3/4">
+      <main className="md:w-3/4 ">
         <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">Our Collections</h1>
 
         {/* Conditional rendering for products */}
@@ -261,7 +261,7 @@ export default function ProductsPage() {
             <p className="text-sm mt-2">Try adjusting your filters or search term.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 ml-9">
             {products.map((product) => (
               <div key={product._id.toString()} className="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105">
                 <Link href={`/products/${product._id.toString()}`}>

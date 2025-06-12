@@ -11,6 +11,7 @@ import { CartItem } from '@/lib/type'; // Import CartItem type
 import { Trash2, Plus, Minus } from 'lucide-react'; // Import icons for cart actions
 import { dispatchCartUpdateEvent } from '@/lib/cartEvents'; // Import custom event dispatcher
 import Link from 'next/link';
+import NewsletterSubscription from '@/components/NewsletterSubscription';
 
 /**
  * Shopping Cart Page.
@@ -165,6 +166,7 @@ export default function CartPage() {
   };
 
   return (
+    <>
     <div className="container mx-auto mt-8 px-4">
       {/* Breadcrumbs */}
       <div className="text-gray-600 text-sm mb-4">
@@ -302,5 +304,7 @@ export default function CartPage() {
         </div>
       )}
     </div>
+    <NewsletterSubscription/>
+    </>
   );
 }

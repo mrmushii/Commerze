@@ -8,6 +8,8 @@ import Image from 'next/image';
 import Hero from '@/components/Hero';
 import { Suspense } from 'react';
 import NewArrivals from '@/components/NewArrivals';
+import Browse from '@/components/Browse';
+import CustomerTestimonials from '@/components/CustomerTestimonials';
 
 export default function HomePage() {
   return (
@@ -24,6 +26,8 @@ export default function HomePage() {
 
       {/* Featured Collections Section */}
       <FeaturedProducts limit={8} title='TOP SELLING'/> {/* Integrated Featured Products Component */}
+
+      <Browse/>
 
       {/* Search Section */}
       <section className="mb-10 bg-white py-5">
@@ -63,9 +67,8 @@ export default function HomePage() {
       </section>
 
       {/* Newsletter Subscription Section */}
-      <section className="my-10 p-6 bg-gray-100 rounded-lg shadow-md">
+        <CustomerTestimonials/>
         <NewsletterSubscription /> {/* Integrated Newsletter Component */}
-      </section>
     </div>
   );
 }
