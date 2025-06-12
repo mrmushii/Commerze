@@ -136,7 +136,7 @@ const NewArrivals: React.FC<NewArrivalsProps> = ({
             View All
           </Link>
     </section>
-  );
+  );
 };
-
+  
 export default NewArrivals;

@@ -140,9 +140,9 @@ const CustomerTestimonials: React.FC<CustomerTestimonialsProps> = ({
             {reviews.map((review) => (
               <CarouselItem
                 key={review._id.toString()}
-                className="pl-2 basis-[320px] sm:basis-[384px] flex-shrink-0 snap-center"
+                className="p-2 basis-[320px] sm:basis-[384px] flex-shrink-0 snap-center"
               >
-                <div className="p-6 bg-white rounded-lg shadow-md h-full">
+                <div className="p-6 py-8 border-transparent bg-white rounded-lg shadow-md h-full">
                   {/* Rating Stars */}
                   <div className="flex items-center mb-3 text-yellow-500">
                     {[...Array(5)].map((_, i) => (
