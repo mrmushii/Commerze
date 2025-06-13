@@ -1,4 +1,3 @@
-// app/contact/page.tsx
 'use client';
 
 import React from 'react';
@@ -6,11 +5,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import toast from 'react-hot-toast';
-import axios from 'axios'; // For simulating API call
-import Link from 'next/link'; // For Home link
-import { Mail, Phone, MapPin, Send } from 'lucide-react'; // Icons for contact info and send button
+import axios from 'axios';
+import Link from 'next/link';
+import { Mail, Phone, MapPin, Send } from 'lucide-react';
 
-// Define Zod schema for the contact form
 const contactFormSchema = z.object({
   name: z.string().min(1, { message: 'Your name is required.' }),
   email: z.string().email({ message: 'A valid email is required.' }),
@@ -33,21 +31,17 @@ export default function ContactSupportPage() {
 
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = form;
 
-  // Handle form submission
   const onSubmit = async (data: ContactFormValues) => {
     toast.dismiss();
     toast.loading('Sending your message...', { id: 'contact-submit' });
 
     try {
-      // Simulate API call to send message (replace with your actual backend endpoint)
-      // In a real app, this would hit an endpoint like /api/contact
       console.log('Contact form data:', data);
-      const response = await axios.post('/api/contact', data); // Assuming a simple /api/contact endpoint
+      const response = await axios.post('/api/contact', data);
 
-      // Simulate success or failure
-      if (response.status === 200) { // Check for a 200 OK status
+      if (response.status === 200) {
         toast.success('Message sent successfully! We will get back to you soon.', { id: 'contact-submit' });
-        reset(); // Reset form fields
+        reset();
       } else {
         toast.error('Failed to send message. Please try again.', { id: 'contact-submit' });
       }
@@ -66,7 +60,6 @@ export default function ContactSupportPage() {
 
   return (
     <div className="container mx-auto mt-10 px-4 py-8">
-      {/* Breadcrumbs */}
       <div className="text-gray-600 text-sm mb-4">
         <Link href="/" className="hover:underline">Home</Link> &gt; Contact Us
       </div>
@@ -76,7 +69,6 @@ export default function ContactSupportPage() {
       </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 bg-white rounded-2xl shadow-xl p-8 lg:p-12">
-        {/* Left Column: Contact Information */}
         <div className="flex flex-col justify-center space-y-8">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">Contact Information</h2>
           <p className="text-lg text-gray-700 leading-relaxed">
@@ -107,8 +99,7 @@ export default function ContactSupportPage() {
           </div>
         </div>
 
-        {/* Right Column: Contact Form */}
-        <div className="p-8 bg-gray-50 rounded-xl shadow-lg"> {/* Slightly raised card for the form */}
+        <div className="p-8 bg-gray-50 rounded-xl shadow-lg">
           <h2 className="text-3xl font-bold text-gray-800 mb-6">Send Us a Message</h2>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>

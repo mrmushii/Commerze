@@ -12,7 +12,6 @@ const Advertise = () => {
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-6">
-        {/* Feature 1 */}
         <div className="p-6 py-16 bg-gray-50 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-left">
           <div className="flex items-center mb-4 text-blue-600">
             <Leaf className="w-6 h-6 mr-2" />
@@ -23,7 +22,6 @@ const Advertise = () => {
           </p>
         </div>
 
-        {/* Feature 2 */}
         <div className="p-6 py-16 bg-gray-50 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-left">
           <div className="flex items-center mb-4 text-blue-600">
             <Sparkles className="w-6 h-6 mr-2" />
@@ -34,7 +32,6 @@ const Advertise = () => {
           </p>
         </div>
 
-        {/* Feature 3 */}
         <div className="p-6 py-16 bg-gray-50 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-left">
           <div className="flex items-center mb-4 text-blue-600">
             <Smile className="w-6 h-6 mr-2" />

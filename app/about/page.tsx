@@ -1,4 +1,3 @@
-// app/about/page.tsx
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -6,7 +5,6 @@ import Link from 'next/link';
 export default function AboutUsPage() {
   return (
     <div className="container mx-auto mt-8 px-4 py-8">
-      {/* Breadcrumbs */}
       <div className="text-gray-600 text-sm mb-4">
         <Link href="/" className="hover:underline">Home</Link> &gt; About Us
       </div>
@@ -15,10 +13,9 @@ export default function AboutUsPage() {
         Discover Our Story: Where Tradition Meets Trend
       </h1>
 
-      {/* Hero Section - Visual and Introduction */}
       <section className="relative h-96 md:h-[500px] bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-xl overflow-hidden mb-12">
         <Image
-          src="https://placehold.it/1400x700.png?text=Chittagong+Port+Fashion" // Placeholder for a scenic image of Chittagong or related
+          src="https://placehold.it/1400x700.png?text=Chittagong+Port+Fashion"
           alt="About Us Banner - Chittagong backdrop"
           fill
           style={{ objectFit: 'cover' }}
@@ -32,7 +29,6 @@ export default function AboutUsPage() {
         </div>
       </section>
 
-      {/* Our Story Section */}
       <section className="mb-12 bg-white rounded-xl shadow-lg p-8 lg:p-10">
         <h2 className="text-4xl font-bold text-gray-900 mb-6 border-b pb-4">Our Story</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-lg text-gray-700 leading-relaxed">
@@ -55,7 +51,6 @@ export default function AboutUsPage() {
         </div>
       </section>
 
-      {/* Our Values Section */}
       <section className="mb-12 bg-gray-50 rounded-xl shadow-lg p-8 lg:p-10">
         <h2 className="text-4xl font-bold text-gray-900 text-center mb-10 border-b pb-4">Our Core Values</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -77,7 +72,6 @@ export default function AboutUsPage() {
         </div>
       </section>
 
-      {/* Connection to Chittagong / Bangladesh Section */}
       <section className="mb-12 bg-white rounded-xl shadow-lg p-8 lg:p-10">
         <h2 className="text-4xl font-bold text-gray-900 mb-6 border-b pb-4">Our Roots: Proudly from Chittagong</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-lg text-gray-700 leading-relaxed items-center">
@@ -91,7 +85,7 @@ export default function AboutUsPage() {
           </div>
           <div className="relative w-full h-64 md:h-80 rounded-lg overflow-hidden shadow-md">
             <Image
-              src="/ctg.jpg" // Placeholder for a cultural image from Chittagong
+              src="/ctg.jpg"
               alt="Chittagong Culture"
               fill
               style={{ objectFit: 'cover' }}
@@ -102,7 +96,6 @@ export default function AboutUsPage() {
         </div>
       </section>
 
-      {/* Call to Action */}
       <section className="text-center bg-blue-50 p-8 rounded-xl shadow-lg">
         <h2 className="text-3xl font-bold text-blue-800 mb-6">Ready to Experience Commerze?</h2>
         <Link href="/products" className="inline-block px-8 py-4 bg-blue-600 text-white font-bold rounded-full shadow-lg hover:bg-blue-700 transition duration-300 transform hover:scale-105">

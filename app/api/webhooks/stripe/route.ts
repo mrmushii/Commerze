@@ -1,4 +1,3 @@
-// app/api/webhooks/stripe/route.ts
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import Stripe from 'stripe';
@@ -19,14 +18,6 @@ export const config = {
   },
 };
 
-/**
- * Handles Stripe webhook events.
- * This webhook is now primarily a fallback/reconciliation mechanism.
- * It ensures ultimate consistency and handles cases where the success page update might fail.
- *
- * @param {Request} req - The incoming request object.
- * @returns {NextResponse} A JSON response.
- */
 export async function POST(req: Request) {
   const rawBody = await req.text();
   const signature = (await headers()).get('stripe-signature');
@@ -79,13 +70,11 @@ export async function POST(req: Request) {
           return NextResponse.json({ received: true, message: 'Missing metadata.' }, { status: 400 });
         }
 
-        // Find the pre-created PENDING order using stripeSessionId
         console.log('Webhook: Looking for pre-existing PENDING order with stripeSessionId:', session.id);
         const orderToUpdate = await Order.findOne({ stripeSessionId: session.id });
 
         if (!orderToUpdate) {
             console.warn(`Webhook: No PENDING order found for session ID ${session.id}. Attempting to create new order as fallback.`);
-            // Fallback: If for some reason the pending order wasn't created (e.g., frontend crash), create it now.
             try {
                 const orderItemsForDb = cart.map(item => ({
                     ...item,
@@ -95,12 +84,11 @@ export async function POST(req: Request) {
                     userId: userId,
                     items: orderItemsForDb,
                     totalAmount: totalAmount,
-                    paymentStatus: 'paid', // Mark as paid
+                    paymentStatus: 'paid',
                     orderStatus: 'pending',
                     stripeSessionId: session.id,
                 });
                 console.log('Webhook: Fallback Order Created in DB with ID:', newOrder._id.toString());
-                // Decrement stock for fallback order
                 for (const item of cart) {
                     const product = await Product.findById(item.productId);
                     if (product) {
@@ -120,27 +108,18 @@ export async function POST(req: Request) {
             }
         }
 
-        // If pending order was found, update its status
         if (orderToUpdate.paymentStatus === 'pending') {
             console.log(`Webhook: Updating existing PENDING order ${orderToUpdate._id} to 'paid'.`);
             orderToUpdate.paymentStatus = 'paid';
-            orderToUpdate.orderStatus = 'processing'; // Or 'pending' depending on your flow
+            orderToUpdate.orderStatus = 'processing';
             await orderToUpdate.save();
             console.log('Webhook: Existing Order Updated.');
 
-            // Decrement product stock (only if not already decremented by /confirm-payment route)
-            // You need a way to track if stock was already decremented.
-            // For simplicity, we'll re-decrement here. In a real app, track `isStockDecremented` on order.
             console.log('Webhook: Re-checking and decrementing stock...');
-            for (const item of orderToUpdate.items) { // Iterate over items in the DB order
+            for (const item of orderToUpdate.items) {
                 const product = await Product.findById(item.productId);
                 if (product) {
-                    // Only decrement if current stock allows and hasn't been decremented for this order
-                    // (This is tricky: a more robust solution adds a flag to the order, or a separate inventory adjustment log)
-                    const newStock = Math.max(0, product.stock - item.quantity); // Prevent negative stock
-                    // To prevent double decrement: you would need to add a flag on the order document
-                    // like `isStockDecremented: true` that this webhook checks before decrementing.
-                    // For now, assuming idempotency where it's okay if it attempts again or initial decrement handles it.
+                    const newStock = Math.max(0, product.stock - item.quantity);
                     await Product.findByIdAndUpdate(item.productId, { stock: newStock });
                     console.log(`Webhook: Updated stock for product ${product.name}: ${product.stock} -> ${newStock}`);
                 } else {
@@ -173,4 +152,3 @@ export async function POST(req: Request) {
     console.log('--- Webhook End ---');
   }
 }
-

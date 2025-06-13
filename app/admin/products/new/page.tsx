@@ -1,15 +1,10 @@
-// app/admin/products/new/page.tsx
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import ProductForm from '@/components/admin/ProductForm';
-import { CustomSessionClaims } from '@/lib/type'; // Import CustomSessionClaims
+import { CustomSessionClaims } from '@/lib/type';
 
-/**
- * Page for adding a new product to the e-commerce store.
- * Requires admin authentication.
- */
 export default async function NewProductPage() {
-  const { userId, sessionClaims } = await auth(); // Await auth()
+  const { userId, sessionClaims } = await auth();
 
   
 

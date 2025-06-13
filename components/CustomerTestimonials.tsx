@@ -1,4 +1,3 @@
-// components/CustomerTestimonials.tsx
 "use client";
 import Autoplay from "embla-carousel-autoplay"
 import {
@@ -10,20 +9,16 @@ import {
 } from "@/components/ui/carousel";
 import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, CheckCircle } from "lucide-react"; // Icons for navigation and checkmark
-import { IReview } from "@/lib/type"; // Import IReview type
-import axios from "axios"; // For fetching reviews
+import { ChevronLeft, ChevronRight, CheckCircle } from "lucide-react";
+import { IReview } from "@/lib/type";
+import axios from "axios";
 import { formatDate } from "date-fns";
 
 interface CustomerTestimonialsProps {
   title?: string;
-  limit?: number; // Number of reviews to fetch (default: 5)
+  limit?: number;
 }
 
-/**
- * A client-side component to display customer testimonials (recent reviews)
- * in a horizontally scrollable carousel. It fetches actual reviews from the backend.
- */
 const CustomerTestimonials: React.FC<CustomerTestimonialsProps> = ({
   title = "OUR HAPPY CUSTOMERS",
   limit,
@@ -33,14 +28,13 @@ const CustomerTestimonials: React.FC<CustomerTestimonialsProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch reviews from the backend
   useEffect(() => {
     const fetchReviews = async () => {
       setLoading(true);
       setError(null);
       try {
         const query = limit ? `?limit=${limit}` : "";
-        const response = await axios.get(`/api/reviews${query}`); // Fetch from the new API route
+        const response = await axios.get(`/api/reviews${query}`);
 
         if (response.data.success) {
           setReviews(response.data.data);
@@ -56,12 +50,8 @@ const CustomerTestimonials: React.FC<CustomerTestimonialsProps> = ({
     };
 
     fetchReviews();
-  }, [limit]); // Re-fetch if limit prop changes
+  }, [limit]);
 
-  /**
-   * Scrolls the container left or right by a fixed amount.
-   * @param {number} scrollOffset - The amount to scroll (positive for right, negative for left).
-   */
   const scroll = (scrollOffset: number) => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollBy({
@@ -107,26 +97,24 @@ const CustomerTestimonials: React.FC<CustomerTestimonialsProps> = ({
   }
 
   return (
-    <section className="my-8 p-6 py-16 bg-gray-50 rounded-lg shadow-xl">
+    <section className="my-8 p-6 py-16 bg-transparent rounded-lg hover:shadow-xl">
       <div className="container mx-auto">
-        {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 uppercase tracking-wide">
             {title}
           </h2>
         </div>
 
-        {/* Carousel */}
         <Carousel
           opts={{
             align: "start",
             loop: true,
           }}
           plugins={[
-        Autoplay({
-          delay: 2000,
-        }),
-      ]}
+            Autoplay({
+              delay: 2000,
+            }),
+          ]}
         >
           <div className="flex space-x-4">
             <CarouselPrevious className="p-5 bg-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -143,7 +131,6 @@ const CustomerTestimonials: React.FC<CustomerTestimonialsProps> = ({
                 className="p-2 basis-[320px] sm:basis-[384px] flex-shrink-0 snap-center"
               >
                 <div className="p-6 py-8 border-transparent bg-white rounded-lg shadow-md h-full">
-                  {/* Rating Stars */}
                   <div className="flex items-center mb-3 text-yellow-500">
                     {[...Array(5)].map((_, i) => (
                       <svg
@@ -165,7 +152,6 @@ const CustomerTestimonials: React.FC<CustomerTestimonialsProps> = ({
                     ))}
                   </div>
 
-                  {/* User Info */}
                   <div className="flex items-center mb-3">
                     {review.userImageUrl && (
                       <Image
@@ -182,7 +168,6 @@ const CustomerTestimonials: React.FC<CustomerTestimonialsProps> = ({
                     <CheckCircle className="w-4 h-4 text-green-500 ml-1" />
                   </div>
 
-                  {/* Comment */}
                   <p className="text-gray-700 leading-relaxed text-sm">
                     "{review.comment}"
                   </p>

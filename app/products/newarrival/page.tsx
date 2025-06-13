@@ -1,28 +1,26 @@
-// app/products/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { IProduct } from "@/lib/type"; // Corrected import path
-import SearchComponent from "@/components/SearchComponent"; // Can be used within the sidebar or elsewhere
-import FeaturedProducts from "@/components/FeaturedProducts"; // For Top Sellers
-import NewArrivals from "@/components/NewArrivals"; // For New Arrivals
+import { IProduct } from "@/lib/type";
+import SearchComponent from "@/components/SearchComponent";
+import FeaturedProducts from "@/components/FeaturedProducts";
+import NewArrivals from "@/components/NewArrivals";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filter states
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedType, setSelectedType] = useState("");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]); // [min, max] for slider
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
   const [selectedColor, setSelectedColor] = useState("");
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
-  const [searchTerm, setSearchTerm] = useState(""); // Added for in-page search
+  const [searchTerm, setSearchTerm] = useState("");
 
   const categories = ["Men", "Women", "Kids"];
   const types = ["Formal", "Casual", "Party", "Sportswear", "Other"];
@@ -47,11 +45,10 @@ export default function ProductsPage() {
       setError(null);
       try {
         const params = new URLSearchParams();
-        if (searchTerm) params.append("q", searchTerm); // Include search term
+        if (searchTerm) params.append("q", searchTerm);
         if (selectedCategory) params.append("category", selectedCategory);
         if (selectedType) params.append("type", selectedType);
 
-        // Append price range from slider
         params.append("minPrice", priceRange[0].toString());
         params.append("maxPrice", priceRange[1].toString());
 
@@ -60,24 +57,23 @@ export default function ProductsPage() {
         if (selectedGender) params.append("gender", selectedGender);
 
         const queryString = params.toString();
-        console.log("Fetching products with query:", queryString); // Debugging log
+        console.log("Fetching products with query:", queryString);
         const response = await fetch(`/api/products/search?${queryString}`);
         const data = await response.json();
 
         if (response.ok && data.success) {
-          // Ensure response.ok (200 status)
           console.log(
             "Fetched products successfully:",
             data.data.length,
             "items"
-          ); // Debugging log
+          );
           setProducts(data.data);
         } else {
-          console.error("Failed to fetch products from API:", data.message); // Debugging log
+          console.error("Failed to fetch products from API:", data.message);
           setError(data.message || "Failed to fetch products.");
         }
       } catch (err: unknown) {
-        console.error("Error fetching products (network/unexpected):", err); // Debugging log
+        console.error("Error fetching products (network/unexpected):", err);
         const errorMessage =
           err instanceof Error ? err.message : "An unknown error occurred.";
         setError(errorMessage);
@@ -88,7 +84,7 @@ export default function ProductsPage() {
 
     const delayDebounceFn = setTimeout(() => {
       fetchProducts();
-    }, 300); // Debounce search/filter changes
+    }, 300);
 
     return () => clearTimeout(delayDebounceFn);
   }, [
@@ -99,24 +95,19 @@ export default function ProductsPage() {
     selectedColor,
     selectedSize,
     selectedGender,
-  ]); // Include all relevant states in dependency array
+  ]);
 
-  
 
   return (
     <div className="container mx-auto p-4 flex flex-col md:flex-row gap-6">
-      {/* Filter Sidebar */}
-      
 
-      {/* Main Content Area - Product Grid */}
       <main className="w-full ">
-      <NewArrivals  />
-      <FeaturedProducts title="Top Sellers You Might Love" limit={4} />
-        <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">
+        <NewArrivals />
+        <FeaturedProducts title="Top Sellers You Might Love" limit={4} />
+        <h1 className="text-3xl md:text-5xl font-extrabold text-center mb-8 bg-gradient-to-b from-purple-200 to-purple-600 bg-clip-text text-transparent uppercase">
           Our Collections
         </h1>
 
-        {/* Conditional rendering for products */}
         {loading ? (
           <div className="text-center p-8">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -144,16 +135,14 @@ export default function ProductsPage() {
                 <Link href={`/products/${product._id.toString()}`}>
                   <div className="relative w-full h-48 bg-gray-200">
                     <Image
-                      // FIX: Use product.imageUrls[0] with optional chaining and fallback
                       src={
                         product.imageUrls?.[0] ||
                         `https://placehold.co/400x300/F0F0F0/ADADAD?text=No+Image`
                       }
                       alt={product.name}
                       layout="fill"
-                      objectFit="cover" // Note: consider replacing with style={{ objectFit: 'cover' }} for Next.js 13+
+                      objectFit="cover"
                       className="rounded-t-lg"
-                      // FIX: Corrected typo HTMLHTMLImageElement to HTMLImageElement
                       onError={(e) => {
                         (
                           e.target as HTMLImageElement
@@ -184,10 +173,6 @@ export default function ProductsPage() {
             ))}
           </div>
         )}
-
-        {/* Featured Collections / Top Sellers Section (Optional: can be at the bottom or on homepage only) */}
-
-        {/* New Arrivals Section (Optional: can be at the bottom or on homepage only) */}
       </main>
     </div>
   );

@@ -1,20 +1,16 @@
-"use client"; // Client component to fetch data and handle loading/error states
+"use client";
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { IProduct } from "@/lib/type"; // Import IProduct type
+import { IProduct } from "@/lib/type";
 
 interface NewArrivalsProps {
-  title?: string; // Custom title for the section
-  limit?: number; // Number of products to fetch (default is handled by API)
+  title?: string;
+  limit?: number;
 }
 
-/**
- * A client-side component to display new arrival products.
- * Fetches products from `/api/products/new-arrivals`.
- */
 const NewArrivals: React.FC<NewArrivalsProps> = ({
   title = "New Arrivals",
   limit,
@@ -50,7 +46,7 @@ const NewArrivals: React.FC<NewArrivalsProps> = ({
     };
 
     fetchNewArrivals();
-  }, [limit]); // Re-fetch if limit prop changes
+  }, [limit]);
 
   if (loading) {
     return (
@@ -79,14 +75,14 @@ const NewArrivals: React.FC<NewArrivalsProps> = ({
   }
 
   return (
-    <section className="mx-0 md:mx-10 mt-8 p-6 py-16 bg-white rounded-lg text-center">
-      <h2 className="text-3xl font-extrabold text-center mb-8 text-gray-800 uppercase">
+    <section className="mx-0 md:mx-10 mt-8 p-6 py-16 bg-transparent rounded-lg text-center">
+      <h2 className="text-3xl md:text-5xl font-extrabold text-center mb-8 bg-gradient-to-b from-purple-200 to-purple-600 bg-clip-text text-transparent uppercase">
         {title}
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-0 md:px-10 my-10">
         {products.map((product) => {
           const rating = product.averageRating || 0;
-          const formattedRating = rating.toFixed(1); // Format to one decimal place
+          const formattedRating = rating.toFixed(1);
 
           return (
             <div
@@ -127,10 +123,9 @@ const NewArrivals: React.FC<NewArrivalsProps> = ({
                     ))}
                     <span className="ml-1 text-gray-500 text-xs">{formattedRating}/5</span>
                   </div>
-                  <p className="text-xl font-bold mt-2 text-gray-800"> {/* Changed back to text-xl for price to match screenshot more closely */}
+                  <p className="text-xl font-bold mt-2 text-gray-800">
                     ${product.price.toFixed(2)}
                   </p>
-                  {/* Removed the old price and discount calculation part */}
                 </div>
               </Link>
             </div>

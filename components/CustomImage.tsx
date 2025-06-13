@@ -1,4 +1,4 @@
-'use client'; // This makes it a Client Component
+'use client'; 
 
 import Image, { ImageProps } from 'next/image';
 import React, { useState } from 'react';

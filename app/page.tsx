@@ -14,7 +14,7 @@ import Advertise from '@/components/Advertise';
 
 export default function HomePage() {
   return (
-    <div className="container mx-auto m-[-60px]">
+    <div className="container bg-gradient-to-br from-emerald-50 via-purple-100 to-pink-100 mx-auto m-[-60px]">
       <Hero/>
       <div className="h-20 w-full relative z-40 top-[-80px] bg-black text-white grid grid-cols-3 md:grid-cols-5 justify-items-center items-center">
         <Image src={"/versage.png"} width={120} height={70} alt='logo'/>
@@ -43,14 +43,13 @@ export default function HomePage() {
         <div className='flex justify-center items-center'>
           <Link
     href="/products/newarrival"
-    className="inline-block px-8 py-4 mb-9 bg-white text-blue-600 font-bold rounded-full shadow-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 animate-fade-in-up delay-300"
+    className="inline-block px-8 py-4 mb-9 bg-gradient-to-br from-rose-100 to-pink-100 text-purple-600 font-bold rounded-full shadow-lg hover:bg-gray-100 transform hover:scale-105 transition duration-300 animate-fade-in-up delay-300"
   >
     View All
   </Link>
         </div>
       </div>
       <hr />
-      {/* Featured Collections Section */}
       <div className='flex flex-col justify-center '>
         <FeaturedProducts limit={4} title='TOP SELLING'/>
         <div className='flex justify-center items-center'>

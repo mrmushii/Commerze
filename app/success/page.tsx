@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { SuccessPageContent } from "./SuccessPageContent";
 
-// Export the main page component wrapped in Suspense for initial render
 export default function SuccessPage() {
   return (
     <Suspense fallback={

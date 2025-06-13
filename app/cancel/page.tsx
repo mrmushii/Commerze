@@ -1,10 +1,5 @@
-// app/cancel/page.tsx
 import Link from 'next/link';
 
-/**
- * Cancel Page after a canceled Stripe Checkout.
- * Informs the user that the payment was not completed.
- */
 export default function CancelPage() {
   return (
     <div className="container mx-auto p-8 text-center bg-white shadow-md rounded-lg max-w-lg mt-10">

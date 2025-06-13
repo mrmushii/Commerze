@@ -1,4 +1,3 @@
-// app/cart/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -27,8 +26,6 @@ export default function CartPage() {
       const storedCart = localStorage.getItem('cart');
       const newCart: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
 
-      // FIX: Only update state if the content of the cart has actually changed
-      // Using JSON.stringify for a simple deep comparison of array content
       if (JSON.stringify(newCart) !== JSON.stringify(cartItems)) {
         setCartItems(newCart);
       }
@@ -49,7 +46,7 @@ export default function CartPage() {
     return () => {
       window.removeEventListener('cartUpdated', handleCartUpdated);
     };
-  }, []); // Dependency array is empty, so this effect runs once on mount
+  }, []); 
 
   const updateQuantity = (productId: string, newQuantity: number) => {
     const updatedCart = cartItems.map(item =>

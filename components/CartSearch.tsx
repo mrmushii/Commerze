@@ -1,4 +1,3 @@
-// components/CartSearch.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -29,11 +28,9 @@ const CartSearch: React.FC<CartSearchProps> = ({ cartItems = [] }) => {
       );
       setFilteredCartItems(results);
     } else {
-      // FIX: When searchTerm is empty, explicitly set filteredCartItems to an empty array
-      // to prevent showing all cart items before any search is typed.
       setFilteredCartItems([]);
     }
-  }, [searchTerm, cartItems]); // Removed filteredCartItems from dependencies previously for depth error
+  }, [searchTerm, cartItems]); 
 
   return (
     <div className="relative w-full max-w-lg mx-auto p-4 bg-white rounded-lg shadow-md">
@@ -46,7 +43,6 @@ const CartSearch: React.FC<CartSearchProps> = ({ cartItems = [] }) => {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      {/* FIX: Only show results if searchTerm is not empty AND there are filtered results */}
       {searchTerm && filteredCartItems && filteredCartItems.length > 0 ? (
         <ul className="space-y-3">
           {filteredCartItems.map(item => (
@@ -67,9 +63,9 @@ const CartSearch: React.FC<CartSearchProps> = ({ cartItems = [] }) => {
             </li>
           ))}
         </ul>
-      ) : searchTerm && !filteredCartItems.length ? ( // Show "No matching items" only if search term exists but no results
+      ) : searchTerm && !filteredCartItems.length ? ( 
         <p className="text-center text-gray-500">No matching items found in your cart.</p>
-      ) : null} {/* Render nothing if search term is empty */}
+      ) : null} 
     </div>
   );
 };

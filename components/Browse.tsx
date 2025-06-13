@@ -6,12 +6,12 @@ import { useRouter } from 'next/navigation';
 
 const Browse = () => {
   const router = useRouter();
-  
+
   const dressStyles = [
-    { name: 'Casual', image: '/cas.png', type: 'Casual',className:"col-span-full md:col-start-1 md:col-span-2 md:row-span-3" },
-    { name: 'Formal', image: '/formal.png', type: 'Formal',className:"col-span-3 row-span-3 col-start-3" },
-    { name: 'Party', image: '/party.png', type: 'Party',className:"col-span-3 row-span-3 col-start-1 row-start-4" },
-    { name: 'Gym', image: '/sports.png', type: 'Gym',className: "col-span-2 row-span-3 col-start-4 row-start-4"},
+    { name: 'Casual', image: '/cas.png', type: 'Casual', className: "col-span-full md:col-start-1 md:col-span-2 md:row-span-3" },
+    { name: 'Formal', image: '/formal.png', type: 'Formal', className: "col-span-3 row-span-3 col-start-3" },
+    { name: 'Party', image: '/party.png', type: 'Party', className: "col-span-3 row-span-3 col-start-1 row-start-4" },
+    { name: 'Gym', image: '/sports.png', type: 'Gym', className: "col-span-2 row-span-3 col-start-4 row-start-4" },
   ];
 
   const handleClick = (type: string) => {
@@ -56,7 +56,7 @@ const Browse = () => {
               height={300}
               className="object-cover w-full h-36 sm:h-48 group-hover:scale-105 transition-transform duration-300 ease-in-out"
             />
-            <div className="absolute top-2 left-2 sm:top-4 sm:left-4  bg-opacity-80 px-3 py-1 rounded-md text-sm sm:text-base md:text-lg font-semibold text-gray-800">
+            <div className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-opacity-80 px-3 py-1 rounded-md text-sm sm:text-base md:text-lg font-semibold text-gray-800">
               {style.name}
             </div>
           </button>

@@ -1,38 +1,21 @@
-// components/AddToCartButton.tsx
-'use client'; // This directive marks the component as a Client Component
+'use client';
 
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { IProduct, CartItem } from '@/lib/type'; // Corrected import path from '@/lib/type' to '@/types'
-// Removed unnecessary import: import mongoose from 'mongoose';
-import { dispatchCartUpdateEvent } from '@/lib/cartEvents'; // Import the custom event dispatcher
+import { IProduct, CartItem } from '@/lib/type';
+import { dispatchCartUpdateEvent } from '@/lib/cartEvents';
 
-/**
- * Props for AddToCartButton.
- * Product data must be a plain object, hence `Omit<IProduct, '_id' | 'createdAt' | 'updatedAt'> & { _id: string }`
- * to ensure _id is a string when passed from server component.
- */
 interface AddToCartButtonProps {
-  product: Omit<IProduct, 'createdAt' | 'updatedAt'>; // Omit Dates and use plain _id as string
+  product: Omit<IProduct, 'createdAt' | 'updatedAt'>;
 }
 
-/**
- * A client-side component for adding products to the shopping cart.
- * It manages local state for quantity and interacts with browser storage.
- */
 const AddToCartButton: React.FC<AddToCartButtonProps> = ({ product }) => {
-  const [quantity, setQuantity] = useState(1); // State for quantity selector
+  const [quantity, setQuantity] = useState(1);
 
-  // Check if the product is out of stock
   const isOutOfStock = product.stock <= 0;
 
-  // Define a fallback image URL for cart items if the product has no images
   const defaultPlaceholderImage = 'https://placehold.it/80x80.png?text=No+Image';
 
-  /**
-   * Handles adding the product to the cart.
-   * Stores cart items in localStorage.
-   */
   const handleAddToCart = () => {
     if (isOutOfStock) {
       toast.error('This product is out of stock.');
@@ -44,19 +27,16 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({ product }) => {
     }
     if (quantity > product.stock) {
       toast.error(`Cannot add more than ${product.stock} units.`);
-      setQuantity(product.stock); // Adjust quantity to max available
+      setQuantity(product.stock);
       return;
     }
 
-    // Retrieve current cart from localStorage
     const storedCart = localStorage.getItem('cart');
     const cart: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
 
-    // Find if item already exists in cart
     const existingItemIndex = cart.findIndex(item => item.productId === product._id.toString());
 
     if (existingItemIndex > -1) {
-      // If item exists, update its quantity
       const newQuantity = cart[existingItemIndex].quantity + quantity;
       if (newQuantity > product.stock) {
         toast.error(`You already have ${cart[existingItemIndex].quantity} of this item. Cannot add ${quantity} more as it exceeds stock.`);
@@ -65,23 +45,20 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({ product }) => {
       cart[existingItemIndex].quantity = newQuantity;
       toast.success(`Updated quantity for ${product.name} in cart!`);
     } else {
-      // If item doesn't exist, add it to cart
       const cartItem: CartItem = {
         productId: product._id.toString(),
         name: product.name,
         price: product.price,
-        // FIX: Ensure imageUrl is taken from product.imageUrls[0] with a robust fallback
-        imageUrl: product.imageUrls?.[0] || defaultPlaceholderImage, // Safely access first image
+        imageUrl: product.imageUrls?.[0] || defaultPlaceholderImage,
         quantity: quantity,
-        discount:product.discount,
+        discount: product.discount,
       };
       cart.push(cartItem);
       toast.success(`${product.name} added to cart!`);
     }
 
-    // Save updated cart to localStorage
     localStorage.setItem('cart', JSON.stringify(cart));
-    dispatchCartUpdateEvent(); // Dispatch custom event to notify Navbar about cart update
+    dispatchCartUpdateEvent();
   };
 
   return (
@@ -90,9 +67,9 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({ product }) => {
         type="number"
         min="1"
         value={quantity}
-        onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))} // Ensure quantity is at least 1
+        onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
         className="w-24 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-        disabled={isOutOfStock} // Disable input if out of stock
+        disabled={isOutOfStock}
       />
       <button
         onClick={handleAddToCart}

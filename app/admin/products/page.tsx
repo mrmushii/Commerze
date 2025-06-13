@@ -1,32 +1,25 @@
-// app/admin/products/page.tsx
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image"; // Keep Image for general usage if needed
+import Image from "next/image";
 import dbConnect from "@/lib/dbConnect";
 import Product from "@/models/Products";
-import { IProduct, CustomSessionClaims } from "@/lib/type"; // Import CustomSessionClaims and IProduct
-import mongoose from "mongoose"; // Import mongoose for type safety
-import ImageWithFallback from "@/components/ImageWithFallback"; // Import the new client component
+import { IProduct, CustomSessionClaims } from "@/lib/type";
+import mongoose from "mongoose";
+import ImageWithFallback from "@/components/ImageWithFallback";
 import DeleteProductButton from "@/components/admin/DeleteProductButton";
 
-/**
- * Admin Product Management Page.
- * This is a Server Component, fetching all products directly from the database.
- */
 export default async function AdminProductsPage() {
-  const { userId, sessionClaims } = await auth(); // Await auth()
+  const { userId, sessionClaims } = await auth();
 
-  // Explicitly cast sessionClaims to our custom type for better type inference
   const claims = sessionClaims as CustomSessionClaims;
 
-  // Redirect if not signed in or not an admin
   if (!userId || claims?.public_metadata?.role !== "admin") {
-    redirect("/sign-in"); // Or a custom unauthorized page
+    redirect("/sign-in");
   }
 
-  await dbConnect(); // Connect to MongoDB
-  const products: IProduct[] = await Product.find({}); // Fetch all products
+  await dbConnect();
+  const products: IProduct[] = await Product.find({});
 
   return (
     <div className="container mx-auto p-4 bg-white shadow-md rounded-lg">
@@ -48,7 +41,6 @@ export default async function AdminProductsPage() {
         </p>
       ) : (
         <div>
-          {/* Desktop Table View (hidden on mobile) */}
           <div className="hidden sm:block w-full overflow-x-auto">
             <div className="min-w-[750px]">
               <table className="w-full bg-white border border-gray-200 rounded-lg">
@@ -129,7 +121,6 @@ export default async function AdminProductsPage() {
             </div>
           </div>
 
-          {/* Mobile Card View (hidden on desktop) */}
           <div className="block sm:hidden space-y-4">
             {products.map((product) => (
               <div

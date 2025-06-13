@@ -1,5 +1,4 @@
-// app/success/page.tsx
-"use client"; // This directive must be at the very top of the file
+"use client"; 
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
@@ -8,11 +7,6 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { IOrder } from "@/lib/type";
 
-/**
- * Success Page content component.
- * This component will now call a new API route `/api/orders/confirm-payment`
- * immediately to update the pre-created pending order and display details.
- */
 export function SuccessPageContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
@@ -34,7 +28,6 @@ export function SuccessPageContent() {
       toast.loading("Confirming your order...", { id: "orderConfirmation" });
 
       try {
-        // Call the new API route to confirm payment and get order details
         const res = await axios.post(`/api/orders/confirm-payment`, {
           sessionId,
         });
@@ -44,7 +37,7 @@ export function SuccessPageContent() {
           toast.success("Order confirmed and details loaded!", {
             id: "orderConfirmation",
           });
-          localStorage.removeItem("cart"); // Clear cart on success
+          localStorage.removeItem("cart"); 
         } else {
           const message =
             res.data.message || "Failed to confirm order with backend.";

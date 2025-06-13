@@ -1,23 +1,18 @@
-// app/dashboard/orders/[id]/page.tsx
 import { auth } from '@clerk/nextjs/server';
 import { redirect, notFound } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
 import { IOrder } from '@/lib/type';
-import mongoose from 'mongoose'; // Import mongoose for isValidObjectId
-import Image from 'next/image'; // Import Next.js Image component
+import mongoose from 'mongoose';
+import Image from 'next/image';
 import Link from 'next/link';
 
 interface OrderDetailPageProps {
   params: { id: string };
 }
 
-/**
- * User Single Order Detail Page.
- * This is a Server Component that fetches a specific order for the authenticated user.
- */
 export default async function OrderDetailPage({ params }: OrderDetailPageProps) {
-  const { userId } = await auth(); // Await auth()
+  const { userId } = await auth();
   const { id } = params;
 
   if (!userId) {
@@ -30,17 +25,15 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
   await dbConnect();
 
   let order: IOrder | null = null;
-  // Try to find by MongoDB ObjectId first, then by stripeSessionId if not found
   if (mongoose.isValidObjectId(id)) {
     order = await Order.findById(id);
   }
-  // If not found by ObjectId or if the ID is not a valid ObjectId, try finding by stripeSessionId
   if (!order) {
     order = await Order.findOne({ stripeSessionId: id });
   }
 
-  if (!order || order.userId !== userId) { // Ensure the order belongs to the current user
-    notFound(); // Not found or unauthorized access to another user's order
+  if (!order || order.userId !== userId) {
+    notFound();
   }
 
   return (

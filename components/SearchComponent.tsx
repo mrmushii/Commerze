@@ -1,12 +1,11 @@
-// components/SearchComponent.tsx
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { IProduct } from '@/lib/type'; // Import IProduct type
+import { IProduct } from '@/lib/type'; 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronDown, ChevronUp } from 'lucide-react'; // Import ChevronDown and ChevronUp icons
+import { ChevronDown, ChevronUp } from 'lucide-react'; 
 
 interface SearchComponentProps {
   isSearchResultsPage?: boolean;
@@ -39,25 +38,19 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ isSearchResultsPage =
   const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
   const genders = ['Men', 'Women', 'Kids', 'Unisex'];
 
-  // Effect to perform search when searchTerm or filters change
-  // This useEffect already handles the debounce for changes in filters and search term
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      // The condition for performing search should remain inclusive of filters being selected
       if (searchTerm.length > 0 || selectedCategory || selectedType || minPrice || maxPrice || selectedColor || selectedSize || selectedGender) {
         performSearch();
       } else {
-        // If all fields are empty, clear results (optional, depends on desired default behavior)
         setSearchResults([]);
-        // Also hide the dropdown if nothing is being searched
         setShowDropdown(false);
       }
-    }, 300); // Debounce search to prevent too many API calls
+    }, 300); 
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm, selectedCategory, selectedType, minPrice, maxPrice, selectedColor, selectedSize, selectedGender]);
 
-  // Effect to close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -72,7 +65,6 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ isSearchResultsPage =
 
   const performSearch = async () => {
     setLoading(true);
-    // Only show dropdown if it's not the dedicated search results page
     if (!isSearchResultsPage) {
       setShowDropdown(true);
     }
@@ -106,10 +98,8 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ isSearchResultsPage =
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // This part remains largely the same, as the useEffect already triggers search on filter change.
-    // The explicit button click should also trigger a search.
+    
     if (isSearchResultsPage) {
-      // If on search results page, update URL and fetch results
       const params = new URLSearchParams();
       if (searchTerm) params.append('q', searchTerm);
       if (selectedCategory) params.append('category', selectedCategory);
@@ -122,8 +112,6 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ isSearchResultsPage =
 
       router.push(`/products/search?${params.toString()}`);
     } else {
-      // If not on search results page, just perform search and show dropdown
-      // This will ensure the button explicitly triggers the search even if only filters are set
       performSearch();
     }
   };
@@ -155,7 +143,6 @@ const SearchComponent: React.FC<SearchComponentProps> = ({ isSearchResultsPage =
             className="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            // Show dropdown on focus if term exists OR if any filters are currently active
             onFocus={() => (searchTerm.length > 0 || selectedCategory || selectedType || minPrice || maxPrice || selectedColor || selectedSize || selectedGender) && setShowDropdown(true)}
           />
           <button

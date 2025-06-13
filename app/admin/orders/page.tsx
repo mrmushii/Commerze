@@ -1,44 +1,32 @@
-// app/admin/orders/page.tsx
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
-import { IOrder, CustomSessionClaims } from '@/lib/type'; // Import CustomSessionClaims
+import { IOrder, CustomSessionClaims } from '@/lib/type';
 import Link from 'next/link';
 import OrderStatusDropdown from '@/components/admin/OrderStatusDropdown';
-import mongoose from 'mongoose'; // Import mongoose for type safety
+import mongoose from 'mongoose';
 
-/**
- * Admin Order Management Page.
- * This is a Server Component that fetches all orders from the database.
- * The page is designed to be responsive, adapting to different screen sizes
- * by showing a table on larger screens and a card view on mobile.
- */
 export default async function AdminOrdersPage() {
-  const { userId, sessionClaims } = await auth(); // Await auth()
+  const { userId, sessionClaims } = await auth();
 
-  // Explicitly cast sessionClaims to our custom type for better type inference
   const claims = sessionClaims as CustomSessionClaims;
 
-  // Redirect if not signed in or not an admin
   if (!userId || claims?.public_metadata?.role !== 'admin') {
     redirect('/sign-in');
   }
 
-  await dbConnect(); // Connect to MongoDB
-  const orders: IOrder[] = await Order.find({}).sort({ createdAt: -1 }); // Fetch all orders, newest first
+  await dbConnect();
+  const orders: IOrder[] = await Order.find({}).sort({ createdAt: -1 });
 
   return (
-    // Main container with responsive padding: p-4 for small screens, p-6 for medium and up
     <div className="container mx-auto p-4 sm:p-6 bg-white shadow-md rounded-lg">
-      {/* Heading with responsive font size */}
       <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-6 text-gray-800">All Orders</h1>
 
       {orders.length === 0 ? (
         <p className="text-center text-gray-600 text-base sm:text-xl mt-8">No orders have been placed yet.</p>
       ) : (
         <>
-          {/* Desktop and Tablet View (Table) - Hidden on extra small screens */}
           <div className="hidden sm:block">
             <table className="min-w-full bg-white border border-gray-200 rounded-lg">
               <thead className="bg-gray-100">
@@ -87,7 +75,6 @@ export default async function AdminOrdersPage() {
             </table>
           </div>
 
-          {/* Mobile View (Cards) - Hidden on small screens and up */}
           <div className="sm:hidden grid grid-cols-1 gap-4">
             {orders.map((order) => (
               <div key={(order._id as mongoose.Types.ObjectId).toString()} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">

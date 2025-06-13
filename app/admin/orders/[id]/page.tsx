@@ -2,28 +2,23 @@ import { auth } from '@clerk/nextjs/server';
 import { redirect, notFound } from 'next/navigation';
 import dbConnect from '@/lib/dbConnect';
 import Order from '@/models/Order';
-import { IOrder, CustomSessionClaims } from '@/lib/type'; // Import CustomSessionClaims
-import mongoose from 'mongoose'; // Import mongoose for isValidObjectId
-import Image from 'next/image'; // Import Next.js Image component
+import { IOrder, CustomSessionClaims } from '@/lib/type';
+import mongoose from 'mongoose';
+import Image from 'next/image';
 import Link from 'next/link';
 
 interface OrderDetailPageProps {
   params: { id: string };
 }
 
-/**
- * Admin Single Order Detail Page.
- * This is a Server Component that fetches a specific order for admin viewing.
- */
 export default async function AdminOrderDetailPage({ params }: OrderDetailPageProps) {
-  const { userId, sessionClaims } = await auth(); // Await auth()
+  const { userId, sessionClaims } = await auth();
   const { id } = await params;
 
-  // Explicitly cast sessionClaims to our custom type for better type inference
   const claims = sessionClaims as CustomSessionClaims;
 
-  if (!userId || claims?.public_metadata?.role !== 'admin') { // Admin-only access
-    redirect('/sign-in'); // Redirect if not signed in or not admin
+  if (!userId || claims?.public_metadata?.role !== 'admin') {
+    redirect('/sign-in');
   }
   if (!id) {
     notFound();
@@ -32,17 +27,15 @@ export default async function AdminOrderDetailPage({ params }: OrderDetailPagePr
   await dbConnect();
 
   let order: IOrder | null = null;
-  // Try to find by MongoDB ObjectId first, then by stripeSessionId if not found
   if (mongoose.isValidObjectId(id)) {
     order = await Order.findById(id);
   }
-  // If not found by ObjectId or if the ID is not a valid ObjectId, try finding by stripeSessionId
   if (!order) {
     order = await Order.findOne({ stripeSessionId: id });
   }
 
   if (!order) {
-    notFound(); // Order not found
+    notFound();
   }
 
   return (
@@ -62,7 +55,7 @@ export default async function AdminOrderDetailPage({ params }: OrderDetailPagePr
           </span>
         </div>
 
-        <p className="text-gray-700"><strong>User ID:</strong> {order.userId}</p> {/* Display full user ID for admin */}
+        <p className="text-gray-700"><strong>User ID:</strong> {order.userId}</p>
         <p className="text-gray-700"><strong>Total Amount:</strong> <span className="font-bold text-blue-700">${order.totalAmount.toFixed(2)}</span></p>
         <p className="text-gray-700"><strong>Payment Status:</strong> <span className={`font-semibold ${
           order.paymentStatus === 'paid' ? 'text-green-600' :
@@ -104,7 +97,6 @@ export default async function AdminOrderDetailPage({ params }: OrderDetailPagePr
         <Link href="/admin/orders" className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-300 shadow-md">
           Back to All Orders
         </Link>
-        {/* You could add more admin actions here, e.g., "Change Order Status" */}
       </div>
     </div>
   );

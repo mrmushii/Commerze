@@ -1,4 +1,3 @@
-// components/ReviewSection.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -7,19 +6,18 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { useAuth, useUser } from '@clerk/nextjs'; // For current user info
-import { IReview } from '@/lib/type'; // Import IReview type
-import Image from 'next/image'; // For user profile images
-import { format } from 'date-fns'; // Import format for date formatting
+import { useAuth, useUser } from '@clerk/nextjs';
+import { IReview } from '@/lib/type';
+import Image from 'next/image';
+import { format } from 'date-fns';
 import Link from 'next/link';
 
 interface ReviewSectionProps {
-  productId: string; // The ID of the product this review section is for
-  onNewReview?: (newReview: IReview) => void; // Callback when a new review is submitted
-  onRatingUpdated?: (averageRating: number, reviewCount: number) => void; // Callback for product rating update
+  productId: string;
+  onNewReview?: (newReview: IReview) => void;
+  onRatingUpdated?: (averageRating: number, reviewCount: number) => void;
 }
 
-// Zod schema for the review form
 const reviewFormSchema = z.object({
   rating: z.coerce.number().min(1, 'Rating is required.').max(5, 'Rating must be between 1 and 5.'),
   comment: z.string().min(10, 'Comment must be at least 10 characters.').max(500, 'Comment cannot exceed 500 characters.'),
@@ -27,33 +25,27 @@ const reviewFormSchema = z.object({
 
 type ReviewFormValues = z.infer<typeof reviewFormSchema>;
 
-/**
- * Client-side component for displaying and submitting product reviews.
- * It fetches existing reviews and provides a form for authenticated users.
- */
 const ReviewSection: React.FC<ReviewSectionProps> = ({ productId, onNewReview, onRatingUpdated }) => {
-  const { isSignedIn, userId } = useAuth(); // Check auth status
-  const { user, isLoaded: isUserLoaded } = useUser();     // Get user object for name/image and its loading state
+  const { isSignedIn, userId } = useAuth();
+  const { user, isLoaded: isUserLoaded } = useUser();
 
   const [reviews, setReviews] = useState<IReview[]>([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
   const [errorLoadingReviews, setErrorLoadingReviews] = useState<string | null>(null);
-  const [hasUserReviewed, setHasUserReviewed] = useState(false); // Track if current user has reviewed
+  const [hasUserReviewed, setHasUserReviewed] = useState(false);
 
   const form = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewFormSchema),
     defaultValues: {
-      rating: 0, // Default to 0, but Zod schema requires 1-5
+      rating: 0,
       comment: '',
     },
   });
 
   const { register, handleSubmit, reset, setValue, watch, formState: { errors, isSubmitting, isValid } } = form;
 
-  // Watch rating value for star display
   const currentRating = watch('rating');
 
-  // Fetch reviews for this product
   useEffect(() => {
     const fetchReviews = async () => {
       setLoadingReviews(true);
@@ -62,7 +54,6 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ productId, onNewReview, o
         const response = await axios.get(`/api/products/${productId}/reviews`);
         if (response.data.success) {
           setReviews(response.data.data);
-          // Check if current user has reviewed
           if (isSignedIn && userId) {
             setHasUserReviewed(response.data.data.some((review: IReview) => review.userId === userId));
           }
@@ -78,18 +69,16 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ productId, onNewReview, o
     };
 
     fetchReviews();
-  }, [productId, isSignedIn, userId]); // Re-fetch if product or user changes
+  }, [productId, isSignedIn, userId]);
 
-  // Handle review submission
   const onSubmit = async (data: ReviewFormValues) => {
-    // Check if user object is loaded and valid before submission
     if (!isSignedIn || !user || !isUserLoaded) {
       toast.error('You must be signed in to submit a review.');
       return;
     }
     if (hasUserReviewed) {
-        toast.error('You have already submitted a review for this product.');
-        return;
+      toast.error('You have already submitted a review for this product.');
+      return;
     }
 
     toast.loading('Submitting review...', { id: 'submitReview' });
@@ -98,25 +87,22 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ productId, onNewReview, o
       const response = await axios.post(`/api/products/${productId}/reviews`, {
         rating: data.rating,
         comment: data.comment,
-        // Pass user info from useUser hook directly
         userName: user.fullName || user.username || user.emailAddresses?.[0]?.emailAddress || 'Anonymous',
-        userImageUrl: user.imageUrl || 'https://placehold.it/40x40.png?text=User', // Ensure fallback
+        userImageUrl: user.imageUrl || 'https://placehold.it/40x40.png?text=User',
       });
       if (response.data.success) {
         const newReview: IReview = response.data.data;
-        setReviews(prev => [newReview, ...prev]); // Add new review to top
+        setReviews(prev => [newReview, ...prev]);
         setHasUserReviewed(true);
-        reset({ rating: 0, comment: '' }); // Clear form
+        reset({ rating: 0, comment: '' });
         toast.success('Review submitted successfully!', { id: 'submitReview' });
 
-        // Callback to parent to update overall product rating
         if (onNewReview) onNewReview(newReview);
         if (onRatingUpdated) {
-            // Re-fetch product data or calculate client-side for updated rating
-            const productResponse = await axios.get(`/api/products/${productId}`);
-            if (productResponse.data.success) {
-                onRatingUpdated(productResponse.data.data.averageRating, productResponse.data.data.reviewCount);
-            }
+          const productResponse = await axios.get(`/api/products/${productId}`);
+          if (productResponse.data.success) {
+            onRatingUpdated(productResponse.data.data.averageRating, productResponse.data.data.reviewCount);
+          }
         }
       } else {
         toast.error(response.data.message || 'Failed to submit review.', { id: 'submitReview' });
@@ -135,12 +121,10 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ productId, onNewReview, o
     <section className="mt-10 p-6 bg-white rounded-lg shadow-lg">
       <h2 className="text-3xl font-bold text-gray-800 mb-6 border-b pb-4">Customer Reviews ({reviews.length})</h2>
 
-      {/* Review Submission Form */}
-      {isSignedIn && isUserLoaded && !hasUserReviewed ? ( // Only show form if signed in and not reviewed yet and user loaded
+      {isSignedIn && isUserLoaded && !hasUserReviewed ? (
         <div className="mb-8 p-6 bg-gray-50 rounded-lg shadow-sm">
           <h3 className="text-xl font-semibold text-gray-800 mb-4">Write a Review</h3>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Rating Stars */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Your Rating</label>
               <div className="flex items-center space-x-1">
@@ -160,7 +144,6 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ productId, onNewReview, o
               {errors.rating && <p className="mt-1 text-sm text-red-600">{errors.rating.message}</p>}
             </div>
 
-            {/* Comment Textarea */}
             <div>
               <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-1">Your Comment</label>
               <textarea
@@ -194,7 +177,6 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ productId, onNewReview, o
         </div>
       )}
 
-      {/* Display Existing Reviews */}
       <h3 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-3">All Reviews</h3>
       {loadingReviews ? (
         <div className="text-center p-4">Loading reviews...</div>

@@ -239,8 +239,7 @@ export default function ProductsPage() {
 
   return (
     <div className="container mx-auto p-4 flex flex-col md:flex-row gap-6">
-      {/* Filter Sidebar Toggle for Mobile */}
-      <div className="md:hidden flex justify-between items-center p-4 bg-white shadow-sm sticky top-0 z-30"> {/* Adjusted top-16 to top-0 and added sticky */}
+      <div className="md:hidden flex justify-between items-center p-4 bg-white shadow-sm sticky top-0 z-30"> 
         <h2 className="text-xl font-bold text-gray-800">Filters</h2>
         <button
           onClick={() => setIsMobileSidebarOpen(true)}
@@ -250,13 +249,10 @@ export default function ProductsPage() {
         </button>
       </div>
 
-      {/* Sidebar - Desktop */}
-      {/* Added h-[calc(100vh-theme(space.24))] and overflow-y-auto */}
       <aside className="hidden md:block md:w-1/4 p-6 bg-white rounded-lg shadow-md sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto">
         {renderSidebarContent()}
       </aside>
 
-      {/* Sidebar Drawer - Mobile */}
       <div className={`fixed inset-0 z-40 bg-black/25 md:hidden transition-opacity duration-300 ${isMobileSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
         <div className={`absolute left-0 top-0 h-full w-3/4 bg-white p-6 shadow-lg transform transition-transform duration-300 ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           <button
@@ -265,18 +261,15 @@ export default function ProductsPage() {
           >
             ✕
           </button>
-          {/* Added h-full and overflow-y-auto to the inner div for mobile sidebar content */}
           <div className="overflow-y-auto h-full pr-2">
             {renderSidebarContent()}
           </div>
         </div>
       </div>
 
-      {/* Main Content Area - Product Grid */}
       <main className="md:w-3/4 ">
         <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">Our Collections</h1>
 
-        {/* Conditional rendering for products */}
         {loading ? (
           <div className="text-center p-8">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -325,10 +318,8 @@ export default function ProductsPage() {
           </div>
         )}
 
-        {/* Featured Collections / Top Sellers Section (Optional: can be at the bottom or on homepage only) */}
         <FeaturedProducts title="Top Sellers You Might Love" limit={4} />
 
-        {/* New Arrivals Section (Optional: can be at the bottom or on homepage only) */}
         <NewArrivals limit={4} />
       </main>
     </div>
