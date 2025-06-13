@@ -49,7 +49,7 @@ const heroSlidesData = [
       "Browse through our diverse range of meticulously crafted garments, designed to bring out your individuality and cater to your sense of style.",
     buttonText: "Shop Now",
     buttonLink: "/products",
-    imageSrc: "/h.jpg", 
+    imageSrc: "/herosec.jpg", 
     classname: "bg-gradient-to-br from-sky-200 via-rose-100 to-amber-100",
     stats: [
       { end: 200, label: "International Brands" },
@@ -67,7 +67,7 @@ const heroSlidesData = [
     description:
       "Explore exclusive collections and trending fashion pieces that speak to your personal style. New arrivals every week!",
     buttonText: "Explore Collections",
-    buttonLink: "/collections",
+    buttonLink: "/products",
     imageSrc: "/herosec3.jpg",
     classname:"bg-gradient-to-br from-stone-600 via-amber-200 to-stone-400",
     stats: [
@@ -86,7 +86,7 @@ const heroSlidesData = [
     description:
       "From casual wear to elegant evening attire, find everything you need to create your perfect ensemble. Quality and comfort guaranteed.",
     buttonText: "View All Products",
-    buttonLink: "/all-products",
+    buttonLink: "/products",
     imageSrc: "/herosec1.jpg", 
     classname:"bg-gradient-to-br from-blue-200 to-gray-200",
     stats: [
@@ -105,7 +105,7 @@ const heroSlidesData = [
     description:
       "Explore exclusive collections and trending fashion pieces that speak to your personal style. New arrivals every week!",
     buttonText: "Explore Collections",
-    buttonLink: "/collections",
+    buttonLink: "/products",
     imageSrc: "/herosec2.jpg",
     classname:"bg-gradient-to-tr from-green-100 via-lime-100 to-yellow-100",
     stats: [
