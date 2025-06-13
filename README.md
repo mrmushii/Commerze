@@ -19,7 +19,12 @@
 ---
 
 <p align="center">
-  <img src="https://placehold.it/1200x600.png?text=Commerze+E-commerce+Homepage+Preview" alt="Commerze E-commerce Homepage Screenshot" width="800">
+  <img src="https://github.com/mrmushii/Commerze/blob/1e6d1c09182ab1eeea9b834e49395674ed76eb82/Screenshot%202025-06-14%20004337.png" alt="Commerze E-commerce Homepage Screenshot" width="800">
+  <img src="https://github.com/mrmushii/Commerze/blob/1e6d1c09182ab1eeea9b834e49395674ed76eb82/Screenshot%202025-06-14%20005311.png" alt="Commerze E-commerce Homepage Screenshot" width="800">
+  <img src="https://github.com/mrmushii/Commerze/blob/1e6d1c09182ab1eeea9b834e49395674ed76eb82/Screenshot%202025-06-14%20005340.png" alt="Commerze E-commerce Homepage Screenshot" width="800">
+  <img src="https://github.com/mrmushii/Commerze/blob/1e6d1c09182ab1eeea9b834e49395674ed76eb82/Screenshot%202025-06-14%20005358.png" alt="Commerze E-commerce Homepage Screenshot" width="800">
+  <img src="https://github.com/mrmushii/Commerze/blob/1e6d1c09182ab1eeea9b834e49395674ed76eb82/Screenshot%202025-06-14%20005413.png" alt="Commerze E-commerce Homepage Screenshot" width="800">
+  <img src="https://github.com/mrmushii/Commerze/blob/1e6d1c09182ab1eeea9b834e49395674ed76eb82/Screenshot%202025-06-14%20005455.png" alt="Commerze E-commerce Homepage Screenshot" width="800">
 </p>
 
 ## ✨ Discover Commerze: Features That Elevate Your Shopping Experience
