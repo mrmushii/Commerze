@@ -69,7 +69,7 @@ const heroSlidesData = [
     buttonText: "Explore Collections",
     buttonLink: "/collections",
     imageSrc: "/herosec3.jpg",
-    classname:"bg-gradient-to-br from-stone-600 via-amber-200 to-stone-400",
+    classname:"bg-gradient-to-br via-amber-200 to-stone-400",
     stats: [
       { end: 50, label: "Exclusive Designers" },
       { end: 1500, label: "New Arrivals" },
@@ -155,13 +155,13 @@ const Hero = () => {
   return (
     <div
       ref={ref} 
-      className={`min-h-screen md:h-screen w-full overflow-hidden relative transition-all duration-1000 ease-in-out ${currentSlide.classname}`}
+      className={`min-h-screen md:h-screen w-full relative transition-all duration-1000 ease-in-out ${currentSlide.classname}`}
     >
       <div className="relative w-full h-full flex items-center justify-center">
         {heroSlidesData.map((slide, index) => (
           <div
             key={slide.id}
-            className={`absolute inset-0 flex flex-col md:flex-row justify-between z-10
+            className={`static md:absolute inset-0 block md:flex md:flex-row justify-between z-10
               ${index === currentSlideIndex ? "block" : "hidden"}
               `}
           >
@@ -184,7 +184,7 @@ const Hero = () => {
                 {slide.buttonText}
               </a>
               <div className="w-full py-10 flex flex-col md:flex-row justify-between items-center">
-                <div className="flex justify-between gap-20 flex-wrap">
+                <div className="flex justify-evenly md:justify-between gap-20 flex-wrap">
                   {slide.stats.map((stat, statIndex) => (
                     <span
                       key={statIndex}
@@ -215,21 +215,21 @@ const Hero = () => {
 
       <button
         onClick={goToPrevSlide}
-        className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white bg-opacity-75 rounded-full p-3 shadow-lg hover:bg-opacity-100 transition z-20 focus:outline-none"
+        className="absolute hidden md:inline top-1/2 left-4 transform -translate-y-1/2 bg-white bg-opacity-75 rounded-full p-3 shadow-lg hover:bg-opacity-100 transition z-20 focus:outline-none"
         aria-label="Previous slide"
       >
         &#10094; 
       </button>
       <button
         onClick={goToNextSlide}
-        className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white bg-opacity-75 rounded-full p-3 shadow-lg hover:bg-opacity-100 transition z-20 focus:outline-none"
+        className="absolute hidden md:inline top-1/2 right-4 transform -translate-y-1/2 bg-white bg-opacity-75 rounded-full p-3 shadow-lg hover:bg-opacity-100 transition z-20 focus:outline-none"
         aria-label="Next slide"
       >
         &#10095;
       </button>
 
       
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
+      {/* <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
         {heroSlidesData.map((_, index) => (
           <button
             key={index}
@@ -240,7 +240,7 @@ const Hero = () => {
             aria-label={`Go to slide ${index + 1}`}
           ></button>
         ))}
-      </div>
+      </div> */}
     </div>
   );
 };
