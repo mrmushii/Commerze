@@ -104,7 +104,7 @@ export default function ProductsPage() {
       <main className="w-full ">
         <NewArrivals />
         <FeaturedProducts title="Top Sellers You Might Love" limit={4} />
-        <h1 className="text-3xl md:text-5xl font-extrabold text-center mb-8 bg-gradient-to-b from-purple-200 to-purple-600 bg-clip-text text-transparent uppercase">
+        <h1 className="text-3xl md:text-5xl font-extrabold text-center mb-8 bg-linear-to-t to-2nd via-fuchsia-500  from-1st text-transparent bg-clip-text uppercase">
           Our Collections
         </h1>
 
