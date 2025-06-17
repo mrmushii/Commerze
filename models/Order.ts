@@ -5,7 +5,7 @@ import { IOrder, IOrderItem } from '@/lib/type'; // Import interfaces from your 
 // Define the Mongoose Schema for an item within an order
 const OrderItemSchema: Schema<IOrderItem> = new Schema(
   {
-    productId: { type: mongoose.Schema.Types.ObjectId, required: true }, // Reference to the Product ID
+    productId: { type: mongoose.Schema.Types.ObjectId, required: true, ref:'Product' }, // Reference to the Product ID
     name: { type: String, required: true }, // Name of the product at the time of order
     imageUrl: { type: String, required: true }, // Image URL of the product at the time of order
     price: { type: Number, required: true, min: 0 }, // Price of the product at the time of order
